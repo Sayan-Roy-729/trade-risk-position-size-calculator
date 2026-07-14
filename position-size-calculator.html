@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Order Ticket — Position Size Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0b1220;
+    --ink-2:#141f33;
+    --ink-line: rgba(230,222,199,0.12);
+    --paper:#f2ead8;
+    --paper-2:#e9dfc7;
+    --paper-line:#c9b98f;
+    --teal:#1f8a70;
+    --teal-deep:#155e4d;
+    --red:#b23a2e;
+    --gold:#a97c2f;
+    --ink-text:#1c1710;
+    --muted:#7a715c;
+    --paper-muted:#9c9273;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, #16233b 0%, transparent 60%),
+      radial-gradient(ellipse 700px 500px at 100% 110%, #101c30 0%, transparent 55%),
+      var(--ink);
+    color:var(--paper);
+    font-family:'Inter', sans-serif;
+    min-height:100vh;
+    padding: 48px 20px 80px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;}
+  }
+
+  .masthead{
+    max-width:920px;
+    margin:0 auto 36px;
+    text-align:center;
+  }
+  .masthead .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.28em;
+    text-transform:uppercase;
+    color:var(--gold);
+    margin-bottom:14px;
+  }
+  .masthead h1{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:clamp(32px, 5vw, 48px);
+    margin:0 0 10px;
+    letter-spacing:-0.01em;
+    color:#f4ecd8;
+  }
+  .masthead p{
+    font-size:15px;
+    color:#a7b0c2;
+    max-width:520px;
+    margin:0 auto;
+    line-height:1.55;
+  }
+
+  .desk{
+    max-width:920px;
+    margin:0 auto;
+    display:grid;
+    grid-template-columns: 1fr;
+    gap:0;
+  }
+
+  /* ---- The Ticket ---- */
+  .ticket{
+    background: var(--paper);
+    color:var(--ink-text);
+    border-radius:14px;
+    position:relative;
+    box-shadow:
+      0 40px 80px -30px rgba(0,0,0,0.6),
+      0 1px 0 rgba(255,255,255,0.05) inset;
+    overflow:hidden;
+  }
+
+  .ticket-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    padding: 26px 32px 20px;
+    border-bottom: 1.5px dashed var(--paper-line);
+  }
+  .ticket-id{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px;
+    color:var(--paper-muted);
+    letter-spacing:0.05em;
+  }
+  .ticket-title{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:22px;
+    margin-top:4px;
+  }
+  .ticket-tag{
+    font-family:'JetBrains Mono', monospace;
+    font-size:10.5px;
+    letter-spacing:0.15em;
+    text-transform:uppercase;
+    color:var(--teal-deep);
+    border:1.5px solid var(--teal-deep);
+    padding:5px 10px;
+    border-radius:3px;
+    white-space:nowrap;
+  }
+
+  .ticket-body{
+    padding: 28px 32px 10px;
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px 28px;
+  }
+  @media (max-width:600px){
+    .ticket-body{grid-template-columns:1fr;}
+    .ticket-top{padding:22px 20px 18px;}
+    .ticket-body{padding:22px 20px 6px;}
+  }
+
+  .field{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .field.full{ grid-column: 1 / -1; }
+
+  .field label{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--muted);
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+  }
+  .field label .hint{
+    text-transform:none;
+    letter-spacing:0;
+    color:var(--paper-muted);
+    font-size:11px;
+  }
+
+  .input-row{
+    position:relative;
+    display:flex;
+    align-items:center;
+    border-bottom: 2px solid var(--paper-line);
+    padding-bottom:6px;
+    transition: border-color 0.15s ease;
+  }
+  .input-row:focus-within{
+    border-color: var(--teal-deep);
+  }
+  .input-row .prefix{
+    font-family:'JetBrains Mono', monospace;
+    font-size:18px;
+    color:var(--paper-muted);
+    margin-right:6px;
+  }
+  .input-row input[type="number"]{
+    flex:1;
+    border:none;
+    background:transparent;
+    outline:none;
+    font-family:'JetBrains Mono', monospace;
+    font-size:20px;
+    font-weight:600;
+    color:var(--ink-text);
+    -moz-appearance: textfield;
+  }
+  .input-row input[type="number"]::-webkit-outer-spin-button,
+  .input-row input[type="number"]::-webkit-inner-spin-button{
+    -webkit-appearance:none; margin:0;
+  }
+  .input-row .suffix{
+    font-family:'JetBrains Mono', monospace;
+    font-size:13px;
+    color:var(--paper-muted);
+  }
+
+  .rate-toggle{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .rate-btn{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12.5px;
+    padding:7px 12px;
+    border-radius:5px;
+    border:1.5px solid var(--paper-line);
+    background:transparent;
+    color:var(--ink-text);
+    cursor:pointer;
+    transition: all 0.15s ease;
+  }
+  .rate-btn:hover{ border-color:var(--teal-deep); }
+  .rate-btn.active{
+    background:var(--teal-deep);
+    border-color:var(--teal-deep);
+    color:var(--paper);
+  }
+  .rate-btn:focus-visible, .input-row input:focus-visible, button:focus-visible{
+    outline: 2px solid var(--gold);
+    outline-offset:2px;
+  }
+
+  .custom-rate{
+    margin-top:8px;
+  }
+  .custom-rate.hidden{ display:none; }
+
+  .slider-row{
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .slider-row input[type="range"]{
+    flex:1;
+    accent-color: var(--teal-deep);
+    height:4px;
+  }
+  .slider-value{
+    font-family:'JetBrains Mono', monospace;
+    font-weight:700;
+    font-size:17px;
+    min-width:52px;
+    text-align:right;
+  }
+
+  .precise-input{
+    display:flex;
+    align-items:center;
+    gap:4px;
+    border-bottom: 2px solid var(--paper-line);
+    padding:2px 2px 4px;
+    min-width:74px;
+    transition: border-color 0.15s ease;
+  }
+  .precise-input:focus-within{ border-color: var(--teal-deep); }
+  .precise-input input[type="number"]{
+    width:52px;
+    border:none;
+    background:transparent;
+    outline:none;
+    font-family:'JetBrains Mono', monospace;
+    font-size:17px;
+    font-weight:700;
+    color:var(--ink-text);
+    text-align:right;
+    -moz-appearance: textfield;
+  }
+  .precise-input input[type="number"]::-webkit-outer-spin-button,
+  .precise-input input[type="number"]::-webkit-inner-spin-button{
+    -webkit-appearance:none; margin:0;
+  }
+  .precise-input .suffix{
+    font-family:'JetBrains Mono', monospace;
+    font-size:13px;
+    color:var(--paper-muted);
+  }
+
+  .perforation{
+    height:0;
+    border-top: 2px dashed var(--paper-line);
+    margin: 22px 0 0;
+    position:relative;
+  }
+  .perforation::before, .perforation::after{
+    content:"";
+    position:absolute;
+    top:-11px;
+    width:22px; height:22px;
+    background: var(--ink);
+    border-radius:50%;
+  }
+  .perforation::before{ left:-43px; }
+  .perforation::after{ right:-43px; }
+
+  /* ---- Results stub ---- */
+  .stub{
+    background: var(--paper-2);
+    padding: 26px 32px 30px;
+    position:relative;
+  }
+  @media (max-width:600px){ .stub{padding:24px 20px 26px;} }
+
+  .stub-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:18px;
+  }
+  .stub-head h2{
+    font-family:'Fraunces', serif;
+    font-size:16px;
+    font-weight:600;
+    margin:0;
+    letter-spacing:0.01em;
+    color:var(--ink-text);
+  }
+
+  .stamp{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11.5px;
+    font-weight:700;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    padding:7px 14px;
+    border-radius:4px;
+    border:2px solid currentColor;
+    transform: rotate(-3deg);
+    opacity:0;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+  .stamp.show{ opacity:1; }
+  .stamp.ok{ color: var(--teal-deep); }
+  .stamp.warn{ color: var(--red); }
+
+  .results-grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:14px;
+    margin-bottom:20px;
+  }
+  @media (max-width:600px){ .results-grid{ grid-template-columns:1fr; } }
+
+  .result-card{
+    background: var(--paper);
+    border:1.5px solid var(--paper-line);
+    border-radius:10px;
+    padding:16px 18px;
+  }
+  .result-card .rc-label{
+    font-family:'JetBrains Mono', monospace;
+    font-size:10.5px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--paper-muted);
+    margin-bottom:8px;
+  }
+  .result-card .rc-value{
+    font-family:'JetBrains Mono', monospace;
+    font-size:24px;
+    font-weight:700;
+    color:var(--ink-text);
+    line-height:1.15;
+  }
+  .result-card .rc-sub{
+    font-family:'JetBrains Mono', monospace;
+    font-size:13px;
+    color:var(--muted);
+    margin-top:3px;
+  }
+  .result-card.primary{
+    background: var(--teal-deep);
+    border-color: var(--teal-deep);
+  }
+  .result-card.primary .rc-label{ color: rgba(242,234,216,0.7); }
+  .result-card.primary .rc-value{ color: var(--paper); }
+  .result-card.primary .rc-sub{ color: rgba(242,234,216,0.75); }
+
+  .gauge-wrap{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    background:var(--paper);
+    border:1.5px solid var(--paper-line);
+    border-radius:10px;
+    padding:16px 18px;
+  }
+  .gauge-track{
+    flex:1;
+    height:8px;
+    background: #ddd2ae;
+    border-radius:6px;
+    overflow:hidden;
+  }
+  .gauge-fill{
+    height:100%;
+    background: var(--teal-deep);
+    width:0%;
+    transition: width 0.3s ease, background 0.3s ease;
+  }
+  .gauge-fill.over{ background: var(--red); }
+  .gauge-label{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px;
+    color:var(--muted);
+    white-space:nowrap;
+  }
+
+  .footnote{
+    margin-top:18px;
+    font-family:'JetBrains Mono', monospace;
+    font-size:11.5px;
+    color:var(--paper-muted);
+    line-height:1.6;
+  }
+
+  .signature{
+    text-align:center;
+    margin-top:34px;
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    color:#5b6478;
+    letter-spacing:0.08em;
+  }
+</style>
+</head>
+<body>
+
+  <div class="masthead">
+    <div class="eyebrow">Risk Desk · Position Sizing</div>
+    <h1>Order Ticket</h1>
+    <p>Fill it out like a trader would. Set your capital, your exchange's ₹/$ rate, how much of the account you'll risk, and your stop-loss distance — the ticket does the rest.</p>
+  </div>
+
+  <div class="desk">
+    <div class="ticket">
+      <div class="ticket-top">
+        <div>
+          <div class="ticket-id">TICKET NO. — LIVE</div>
+          <div class="ticket-title">Position Size Worksheet</div>
+        </div>
+        <div class="ticket-tag" id="statusTag">Awaiting entry</div>
+      </div>
+
+      <div class="ticket-body">
+        <div class="field full">
+          <label for="capital">Trading Capital <span class="hint">in ₹ (INR)</span></label>
+          <div class="input-row">
+            <span class="prefix">₹</span>
+            <input type="number" id="capital" placeholder="100000" min="0" step="100" inputmode="decimal">
+          </div>
+        </div>
+
+        <div class="field full">
+          <label>Exchange Rate <span class="hint">₹ per $1</span></label>
+          <div class="rate-toggle" id="rateToggle">
+            <button type="button" class="rate-btn active" data-rate="85">₹85</button>
+            <button type="button" class="rate-btn" data-rate="102">₹102</button>
+            <button type="button" class="rate-btn" data-rate="custom">Custom</button>
+          </div>
+          <div class="input-row custom-rate hidden" id="customRateRow">
+            <span class="prefix">₹</span>
+            <input type="number" id="customRate" placeholder="e.g. 89.5" min="0" step="0.01" inputmode="decimal">
+            <span class="suffix">/ $1</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Max Risk Per Trade <span class="hint" id="riskPctLabel">1%</span></label>
+          <div class="slider-row">
+            <input type="range" id="riskPct" min="0.1" max="10" step="0.1" value="1">
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Stop-Loss Distance <span class="hint">from entry</span></label>
+          <div class="slider-row">
+            <input type="range" id="slPctSlider" min="0.1" max="20" step="0.1" value="2">
+            <div class="precise-input">
+              <input type="number" id="slPct" min="0.01" max="20" step="0.01" value="2.00" inputmode="decimal">
+              <span class="suffix">%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="perforation"></div>
+
+      <div class="stub">
+        <div class="stub-head">
+          <h2>Calculated Position</h2>
+          <div class="stamp ok" id="stamp">Sized</div>
+        </div>
+
+        <div class="results-grid">
+          <div class="result-card primary">
+            <div class="rc-label">Risk Amount</div>
+            <div class="rc-value" id="riskInr">₹0</div>
+            <div class="rc-sub" id="riskUsd">$0.00</div>
+          </div>
+          <div class="result-card primary">
+            <div class="rc-label">Position Size</div>
+            <div class="rc-value" id="posUsd">$0.00</div>
+            <div class="rc-sub" id="posInr">₹0</div>
+          </div>
+          <div class="result-card">
+            <div class="rc-label">Capital in USD</div>
+            <div class="rc-value" id="capUsd">$0.00</div>
+            <div class="rc-sub">at current rate</div>
+          </div>
+          <div class="result-card">
+            <div class="rc-label">Position as % of Capital</div>
+            <div class="rc-value" id="posPct">0%</div>
+            <div class="rc-sub" id="leverageNote">no leverage needed</div>
+          </div>
+        </div>
+
+        <div class="gauge-wrap">
+          <div class="gauge-label">Risk used</div>
+          <div class="gauge-track"><div class="gauge-fill" id="gaugeFill"></div></div>
+          <div class="gauge-label" id="gaugeText">1.0%</div>
+        </div>
+
+        <div class="footnote" id="footnote">
+          Risk Amount = Capital × Risk% &nbsp;·&nbsp; Position Size = Risk Amount ÷ SL%
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="signature">— fill in the blanks, the ticket recalculates as you type —</div>
+
+<script>
+(function(){
+  const capitalEl = document.getElementById('capital');
+  const riskPctEl = document.getElementById('riskPct');
+  const slPctEl = document.getElementById('slPct');
+  const slPctSlider = document.getElementById('slPctSlider');
+  const riskPctLabel = document.getElementById('riskPctLabel');
+  const customRateRow = document.getElementById('customRateRow');
+  const customRateEl = document.getElementById('customRate');
+  const rateButtons = document.querySelectorAll('.rate-btn');
+  const statusTag = document.getElementById('statusTag');
+  const stamp = document.getElementById('stamp');
+  const gaugeFill = document.getElementById('gaugeFill');
+  const gaugeText = document.getElementById('gaugeText');
+
+  let currentRate = 85;
+
+  function fmtInr(n){
+    if(!isFinite(n)) n = 0;
+    return '₹' + n.toLocaleString('en-IN', {maximumFractionDigits:2});
+  }
+  function fmtUsd(n){
+    if(!isFinite(n)) n = 0;
+    return '$' + n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  }
+
+  rateButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      rateButtons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      if(btn.dataset.rate === 'custom'){
+        customRateRow.classList.remove('hidden');
+        currentRate = parseFloat(customRateEl.value) || 0;
+        customRateEl.focus();
+      } else {
+        customRateRow.classList.add('hidden');
+        currentRate = parseFloat(btn.dataset.rate);
+      }
+      calculate();
+    });
+  });
+
+  customRateEl.addEventListener('input', () => {
+    currentRate = parseFloat(customRateEl.value) || 0;
+    calculate();
+  });
+
+  function calculate(){
+    const capital = parseFloat(capitalEl.value) || 0;
+    const riskPct = parseFloat(riskPctEl.value) || 0;
+    const slPct = parseFloat(slPctEl.value) || 0;
+    const rate = currentRate > 0 ? currentRate : 0;
+
+    riskPctLabel.textContent = riskPct.toFixed(1) + '%';
+
+    const riskAmountInr = capital * (riskPct / 100);
+    const riskAmountUsd = rate > 0 ? riskAmountInr / rate : 0;
+
+    const positionInr = slPct > 0 ? riskAmountInr / (slPct / 100) : 0;
+    const positionUsd = rate > 0 ? positionInr / rate : 0;
+
+    const capitalUsd = rate > 0 ? capital / rate : 0;
+    const posPctOfCapital = capital > 0 ? (positionInr / capital) * 100 : 0;
+
+    document.getElementById('riskInr').textContent = fmtInr(riskAmountInr);
+    document.getElementById('riskUsd').textContent = fmtUsd(riskAmountUsd);
+    document.getElementById('posUsd').textContent = fmtUsd(positionUsd);
+    document.getElementById('posInr').textContent = fmtInr(positionInr);
+    document.getElementById('capUsd').textContent = fmtUsd(capitalUsd);
+    document.getElementById('posPct').textContent = posPctOfCapital.toFixed(1) + '%';
+
+    const leverageNote = document.getElementById('leverageNote');
+    if(posPctOfCapital > 100){
+      leverageNote.textContent = (posPctOfCapital/100).toFixed(2) + '× leverage required';
+    } else {
+      leverageNote.textContent = 'no leverage needed';
+    }
+
+    const gaugePct = Math.min(riskPct / 5 * 100, 100); // gauge maxes visually at 5% risk
+    gaugeFill.style.width = gaugePct + '%';
+    gaugeText.textContent = riskPct.toFixed(1) + '%';
+
+    if(riskPct > 2){
+      gaugeFill.classList.add('over');
+      stamp.classList.remove('ok');
+      stamp.classList.add('warn');
+      stamp.textContent = 'High Risk';
+      statusTag.textContent = 'Exceeds comfort zone';
+      statusTag.style.color = 'var(--red)';
+      statusTag.style.borderColor = 'var(--red)';
+    } else {
+      gaugeFill.classList.remove('over');
+      stamp.classList.remove('warn');
+      stamp.classList.add('ok');
+      stamp.textContent = 'Sized';
+      statusTag.textContent = capital > 0 ? 'Within risk limit' : 'Awaiting entry';
+      statusTag.style.color = '';
+      statusTag.style.borderColor = '';
+    }
+    stamp.classList.add('show');
+
+    document.getElementById('footnote').innerHTML =
+      'Risk Amount = ' + fmtInr(capital) + ' × ' + riskPct.toFixed(1) + '% &nbsp;·&nbsp; ' +
+      'Position Size = ' + fmtInr(riskAmountInr) + ' ÷ ' + slPct.toFixed(2) + '% &nbsp;·&nbsp; ' +
+      'Rate used: ₹' + (rate || 0) + ' / $1';
+  }
+
+  slPctSlider.addEventListener('input', () => {
+    slPctEl.value = parseFloat(slPctSlider.value).toFixed(2);
+    calculate();
+  });
+  slPctEl.addEventListener('input', () => {
+    const v = parseFloat(slPctEl.value);
+    if(!isNaN(v)){
+      slPctSlider.value = Math.min(Math.max(v, 0.1), 20);
+    }
+    calculate();
+  });
+
+  [capitalEl, riskPctEl].forEach(el => el.addEventListener('input', calculate));
+
+  // sensible starting values
+  capitalEl.value = 100000;
+  calculate();
+})();
+</script>
+</body>
+</html>
