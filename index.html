@@ -1,660 +1,1392 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Order Ticket — Position Size Calculator</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --ink:#0b1220;
-    --ink-2:#141f33;
-    --ink-line: rgba(230,222,199,0.12);
-    --paper:#f2ead8;
-    --paper-2:#e9dfc7;
-    --paper-line:#c9b98f;
-    --teal:#1f8a70;
-    --teal-deep:#155e4d;
-    --red:#b23a2e;
-    --gold:#a97c2f;
-    --ink-text:#1c1710;
-    --muted:#7a715c;
-    --paper-muted:#9c9273;
-  }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Ticket — Position Size Calculator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --ink: #0b1220;
+            --ink-2: #141f33;
+            --ink-line: rgba(230, 222, 199, 0.12);
+            --paper: #f2ead8;
+            --paper-2: #e9dfc7;
+            --paper-line: #c9b98f;
+            --teal: #1f8a70;
+            --teal-deep: #155e4d;
+            --red: #b23a2e;
+            --gold: #a97c2f;
+            --ink-text: #1c1710;
+            --muted: #7a715c;
+            --paper-muted: #9c9273;
+        }
 
-  *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;}
-  body{
-    background:
-      radial-gradient(ellipse 900px 500px at 15% -10%, #16233b 0%, transparent 60%),
-      radial-gradient(ellipse 700px 500px at 100% 110%, #101c30 0%, transparent 55%),
-      var(--ink);
-    color:var(--paper);
-    font-family:'Inter', sans-serif;
-    min-height:100vh;
-    padding: 48px 20px 80px;
-  }
+        * {
+            box-sizing: border-box;
+        }
 
-  @media (prefers-reduced-motion: reduce){
-    *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;}
-  }
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+        }
 
-  .masthead{
-    max-width:920px;
-    margin:0 auto 36px;
-    text-align:center;
-  }
-  .masthead .eyebrow{
-    font-family:'JetBrains Mono', monospace;
-    font-size:11px;
-    letter-spacing:0.28em;
-    text-transform:uppercase;
-    color:var(--gold);
-    margin-bottom:14px;
-  }
-  .masthead h1{
-    font-family:'Fraunces', serif;
-    font-weight:600;
-    font-size:clamp(32px, 5vw, 48px);
-    margin:0 0 10px;
-    letter-spacing:-0.01em;
-    color:#f4ecd8;
-  }
-  .masthead p{
-    font-size:15px;
-    color:#a7b0c2;
-    max-width:520px;
-    margin:0 auto;
-    line-height:1.55;
-  }
+        body {
+            background:
+                radial-gradient(ellipse 900px 500px at 15% -10%, #16233b 0%, transparent 60%),
+                radial-gradient(ellipse 700px 500px at 100% 110%, #101c30 0%, transparent 55%),
+                var(--ink);
+            color: var(--paper);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            padding: 36px 16px 80px;
+        }
 
-  .desk{
-    max-width:920px;
-    margin:0 auto;
-    display:grid;
-    grid-template-columns: 1fr;
-    gap:0;
-  }
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
 
-  /* ---- The Ticket ---- */
-  .ticket{
-    background: var(--paper);
-    color:var(--ink-text);
-    border-radius:14px;
-    position:relative;
-    box-shadow:
-      0 40px 80px -30px rgba(0,0,0,0.6),
-      0 1px 0 rgba(255,255,255,0.05) inset;
-    overflow:hidden;
-  }
+        .masthead {
+            max-width: 860px;
+            margin: 0 auto 28px;
+            text-align: center;
+        }
 
-  .ticket-top{
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-start;
-    padding: 26px 32px 20px;
-    border-bottom: 1.5px dashed var(--paper-line);
-  }
-  .ticket-id{
-    font-family:'JetBrains Mono', monospace;
-    font-size:12px;
-    color:var(--paper-muted);
-    letter-spacing:0.05em;
-  }
-  .ticket-title{
-    font-family:'Fraunces', serif;
-    font-weight:600;
-    font-size:22px;
-    margin-top:4px;
-  }
-  .ticket-tag{
-    font-family:'JetBrains Mono', monospace;
-    font-size:10.5px;
-    letter-spacing:0.15em;
-    text-transform:uppercase;
-    color:var(--teal-deep);
-    border:1.5px solid var(--teal-deep);
-    padding:5px 10px;
-    border-radius:3px;
-    white-space:nowrap;
-  }
+        .masthead .eyebrow {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 0.28em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 10px;
+        }
 
-  .ticket-body{
-    padding: 28px 32px 10px;
-    display:grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 22px 28px;
-  }
-  @media (max-width:600px){
-    .ticket-body{grid-template-columns:1fr;}
-    .ticket-top{padding:22px 20px 18px;}
-    .ticket-body{padding:22px 20px 6px;}
-  }
+        .masthead h1 {
+            font-family: 'Fraunces', serif;
+            font-weight: 600;
+            font-size: clamp(28px, 4.5vw, 42px);
+            margin: 0 0 8px;
+            letter-spacing: -0.01em;
+            color: #f4ecd8;
+        }
 
-  .field{
-    display:flex;
-    flex-direction:column;
-    gap:8px;
-  }
-  .field.full{ grid-column: 1 / -1; }
+        .masthead p {
+            font-size: 14px;
+            color: #a7b0c2;
+            max-width: 580px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
 
-  .field label{
-    font-family:'JetBrains Mono', monospace;
-    font-size:11px;
-    letter-spacing:0.1em;
-    text-transform:uppercase;
-    color:var(--muted);
-    display:flex;
-    justify-content:space-between;
-    align-items:baseline;
-  }
-  .field label .hint{
-    text-transform:none;
-    letter-spacing:0;
-    color:var(--paper-muted);
-    font-size:11px;
-  }
+        .desk {
+            max-width: 860px;
+            margin: 0 auto;
+        }
 
-  .input-row{
-    position:relative;
-    display:flex;
-    align-items:center;
-    border-bottom: 2px solid var(--paper-line);
-    padding-bottom:6px;
-    transition: border-color 0.15s ease;
-  }
-  .input-row:focus-within{
-    border-color: var(--teal-deep);
-  }
-  .input-row .prefix{
-    font-family:'JetBrains Mono', monospace;
-    font-size:18px;
-    color:var(--paper-muted);
-    margin-right:6px;
-  }
-  .input-row input[type="number"]{
-    flex:1;
-    border:none;
-    background:transparent;
-    outline:none;
-    font-family:'JetBrains Mono', monospace;
-    font-size:20px;
-    font-weight:600;
-    color:var(--ink-text);
-    -moz-appearance: textfield;
-  }
-  .input-row input[type="number"]::-webkit-outer-spin-button,
-  .input-row input[type="number"]::-webkit-inner-spin-button{
-    -webkit-appearance:none; margin:0;
-  }
-  .input-row .suffix{
-    font-family:'JetBrains Mono', monospace;
-    font-size:13px;
-    color:var(--paper-muted);
-  }
+        /* ---- The Ticket ---- */
+        .ticket {
+            background: var(--paper);
+            color: var(--ink-text);
+            border-radius: 14px;
+            position: relative;
+            box-shadow:
+                0 40px 80px -30px rgba(0, 0, 0, 0.6),
+                0 1px 0 rgba(255, 255, 255, 0.05) inset;
+            overflow: hidden;
+        }
 
-  .rate-toggle{
-    display:flex;
-    gap:8px;
-    flex-wrap:wrap;
-  }
-  .rate-btn{
-    font-family:'JetBrains Mono', monospace;
-    font-size:12.5px;
-    padding:7px 12px;
-    border-radius:5px;
-    border:1.5px solid var(--paper-line);
-    background:transparent;
-    color:var(--ink-text);
-    cursor:pointer;
-    transition: all 0.15s ease;
-  }
-  .rate-btn:hover{ border-color:var(--teal-deep); }
-  .rate-btn.active{
-    background:var(--teal-deep);
-    border-color:var(--teal-deep);
-    color:var(--paper);
-  }
-  .rate-btn:focus-visible, .input-row input:focus-visible, button:focus-visible{
-    outline: 2px solid var(--gold);
-    outline-offset:2px;
-  }
+        .ticket-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 22px 28px 16px;
+            border-bottom: 1.5px dashed var(--paper-line);
+            flex-wrap: wrap;
+            gap: 12px;
+        }
 
-  .custom-rate{
-    margin-top:8px;
-  }
-  .custom-rate.hidden{ display:none; }
+        .ticket-id {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--paper-muted);
+            letter-spacing: 0.05em;
+        }
 
-  .slider-row{
-    display:flex;
-    align-items:center;
-    gap:14px;
-  }
-  .slider-row input[type="range"]{
-    flex:1;
-    accent-color: var(--teal-deep);
-    height:4px;
-  }
-  .slider-value{
-    font-family:'JetBrains Mono', monospace;
-    font-weight:700;
-    font-size:17px;
-    min-width:52px;
-    text-align:right;
-  }
+        .ticket-title {
+            font-family: 'Fraunces', serif;
+            font-weight: 600;
+            font-size: 22px;
+            margin-top: 2px;
+        }
 
-  .precise-input{
-    display:flex;
-    align-items:center;
-    gap:4px;
-    border-bottom: 2px solid var(--paper-line);
-    padding:2px 2px 4px;
-    min-width:74px;
-    transition: border-color 0.15s ease;
-  }
-  .precise-input:focus-within{ border-color: var(--teal-deep); }
-  .precise-input input[type="number"]{
-    width:52px;
-    border:none;
-    background:transparent;
-    outline:none;
-    font-family:'JetBrains Mono', monospace;
-    font-size:17px;
-    font-weight:700;
-    color:var(--ink-text);
-    text-align:right;
-    -moz-appearance: textfield;
-  }
-  .precise-input input[type="number"]::-webkit-outer-spin-button,
-  .precise-input input[type="number"]::-webkit-inner-spin-button{
-    -webkit-appearance:none; margin:0;
-  }
-  .precise-input .suffix{
-    font-family:'JetBrains Mono', monospace;
-    font-size:13px;
-    color:var(--paper-muted);
-  }
+        .top-tags {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
 
-  .perforation{
-    height:0;
-    border-top: 2px dashed var(--paper-line);
-    margin: 22px 0 0;
-    position:relative;
-  }
-  .perforation::before, .perforation::after{
-    content:"";
-    position:absolute;
-    top:-11px;
-    width:22px; height:22px;
-    background: var(--ink);
-    border-radius:50%;
-  }
-  .perforation::before{ left:-43px; }
-  .perforation::after{ right:-43px; }
+        .ticket-tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10.5px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--teal-deep);
+            border: 1.5px solid var(--teal-deep);
+            padding: 4px 10px;
+            border-radius: 3px;
+            white-space: nowrap;
+        }
 
-  /* ---- Results stub ---- */
-  .stub{
-    background: var(--paper-2);
-    padding: 26px 32px 30px;
-    position:relative;
-  }
-  @media (max-width:600px){ .stub{padding:24px 20px 26px;} }
+        /* Control Strip */
+        .control-strip {
+            background: #e5dbc1;
+            padding: 10px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1.5px solid var(--paper-line);
+            gap: 12px;
+            flex-wrap: wrap;
+        }
 
-  .stub-head{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:18px;
-  }
-  .stub-head h2{
-    font-family:'Fraunces', serif;
-    font-size:16px;
-    font-weight:600;
-    margin:0;
-    letter-spacing:0.01em;
-    color:var(--ink-text);
-  }
+        .pill-group {
+            display: flex;
+            background: var(--paper);
+            padding: 3px;
+            border-radius: 6px;
+            border: 1px solid var(--paper-line);
+        }
 
-  .stamp{
-    font-family:'JetBrains Mono', monospace;
-    font-size:11.5px;
-    font-weight:700;
-    letter-spacing:0.12em;
-    text-transform:uppercase;
-    padding:7px 14px;
-    border-radius:4px;
-    border:2px solid currentColor;
-    transform: rotate(-3deg);
-    opacity:0;
-    transition: opacity 0.25s ease, transform 0.25s ease;
-  }
-  .stamp.show{ opacity:1; }
-  .stamp.ok{ color: var(--teal-deep); }
-  .stamp.warn{ color: var(--red); }
+        .pill-btn {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 5px 12px;
+            border: none;
+            background: transparent;
+            color: var(--muted);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
 
-  .results-grid{
-    display:grid;
-    grid-template-columns: 1fr 1fr;
-    gap:14px;
-    margin-bottom:20px;
-  }
-  @media (max-width:600px){ .results-grid{ grid-template-columns:1fr; } }
+        .pill-btn.active {
+            background: var(--ink);
+            color: var(--paper);
+        }
 
-  .result-card{
-    background: var(--paper);
-    border:1.5px solid var(--paper-line);
-    border-radius:10px;
-    padding:16px 18px;
-  }
-  .result-card .rc-label{
-    font-family:'JetBrains Mono', monospace;
-    font-size:10.5px;
-    letter-spacing:0.1em;
-    text-transform:uppercase;
-    color:var(--paper-muted);
-    margin-bottom:8px;
-  }
-  .result-card .rc-value{
-    font-family:'JetBrains Mono', monospace;
-    font-size:24px;
-    font-weight:700;
-    color:var(--ink-text);
-    line-height:1.15;
-  }
-  .result-card .rc-sub{
-    font-family:'JetBrains Mono', monospace;
-    font-size:13px;
-    color:var(--muted);
-    margin-top:3px;
-  }
-  .result-card.primary{
-    background: var(--teal-deep);
-    border-color: var(--teal-deep);
-  }
-  .result-card.primary .rc-label{ color: rgba(242,234,216,0.7); }
-  .result-card.primary .rc-value{ color: var(--paper); }
-  .result-card.primary .rc-sub{ color: rgba(242,234,216,0.75); }
+        .pill-btn.long.active {
+            background: var(--teal-deep);
+            color: var(--paper);
+        }
 
-  .gauge-wrap{
-    display:flex;
-    align-items:center;
-    gap:16px;
-    background:var(--paper);
-    border:1.5px solid var(--paper-line);
-    border-radius:10px;
-    padding:16px 18px;
-  }
-  .gauge-track{
-    flex:1;
-    height:8px;
-    background: #ddd2ae;
-    border-radius:6px;
-    overflow:hidden;
-  }
-  .gauge-fill{
-    height:100%;
-    background: var(--teal-deep);
-    width:0%;
-    transition: width 0.3s ease, background 0.3s ease;
-  }
-  .gauge-fill.over{ background: var(--red); }
-  .gauge-label{
-    font-family:'JetBrains Mono', monospace;
-    font-size:12px;
-    color:var(--muted);
-    white-space:nowrap;
-  }
+        .pill-btn.short.active {
+            background: var(--red);
+            color: var(--paper);
+        }
 
-  .footnote{
-    margin-top:18px;
-    font-family:'JetBrains Mono', monospace;
-    font-size:11.5px;
-    color:var(--paper-muted);
-    line-height:1.6;
-  }
+        .ticket-body {
+            padding: 22px 28px 10px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px 24px;
+        }
 
-  .signature{
-    text-align:center;
-    margin-top:34px;
-    font-family:'JetBrains Mono', monospace;
-    font-size:11px;
-    color:#5b6478;
-    letter-spacing:0.08em;
-  }
-</style>
+        @media (max-width:640px) {
+            .ticket-body {
+                grid-template-columns: 1fr;
+                padding: 18px 16px 6px;
+            }
+
+            .ticket-top,
+            .control-strip {
+                padding: 16px 16px;
+            }
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .field.full {
+            grid-column: 1 / -1;
+        }
+
+        .field label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--muted);
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        .field label .hint {
+            text-transform: none;
+            letter-spacing: 0;
+            color: var(--paper-muted);
+            font-size: 11px;
+        }
+
+        .badge-words {
+            background: #e2d7ba;
+            color: var(--teal-deep);
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 11px;
+            padding: 2px 7px;
+            border-radius: 4px;
+            border: 1px solid var(--paper-line);
+            letter-spacing: 0.02em;
+        }
+
+        .input-row {
+            position: relative;
+            display: flex;
+            align-items: center;
+            border-bottom: 2px solid var(--paper-line);
+            padding-bottom: 4px;
+            transition: border-color 0.15s ease;
+        }
+
+        .input-row:focus-within {
+            border-color: var(--teal-deep);
+        }
+
+        .input-row .prefix {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 16px;
+            color: var(--paper-muted);
+            margin-right: 6px;
+        }
+
+        .input-row input[type="number"],
+        .input-row input[type="text"] {
+            flex: 1;
+            border: none;
+            background: transparent;
+            outline: none;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--ink-text);
+            -moz-appearance: textfield;
+        }
+
+        .input-row input[type="number"]::-webkit-outer-spin-button,
+        .input-row input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .input-row .suffix {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--paper-muted);
+        }
+
+        .chip-group {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .chip-btn {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1.2px solid var(--paper-line);
+            background: transparent;
+            color: var(--ink-text);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .chip-btn:hover {
+            border-color: var(--teal-deep);
+        }
+
+        .chip-btn.active {
+            background: var(--teal-deep);
+            border-color: var(--teal-deep);
+            color: var(--paper);
+        }
+
+        .chip-btn:focus-visible,
+        .pill-btn:focus-visible,
+        input:focus-visible,
+        button:focus-visible {
+            outline: 2px solid var(--gold);
+            outline-offset: 2px;
+        }
+
+        .slider-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .slider-row input[type="range"] {
+            flex: 1;
+            accent-color: var(--teal-deep);
+            height: 4px;
+        }
+
+        .precise-input {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            border-bottom: 2px solid var(--paper-line);
+            padding: 2px 2px 3px;
+            min-width: 68px;
+            transition: border-color 0.15s ease;
+        }
+
+        .precise-input:focus-within {
+            border-color: var(--teal-deep);
+        }
+
+        .precise-input input[type="number"] {
+            width: 48px;
+            border: none;
+            background: transparent;
+            outline: none;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--ink-text);
+            text-align: right;
+            -moz-appearance: textfield;
+        }
+
+        .precise-input input[type="number"]::-webkit-outer-spin-button,
+        .precise-input input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .precise-input .suffix {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--paper-muted);
+        }
+
+        /* Multi-TP Section */
+        .tp-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 4px;
+        }
+
+        @media (max-width:640px) {
+            .tp-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .tp-box {
+            background: rgba(0, 0, 0, 0.025);
+            border: 1px solid var(--paper-line);
+            border-radius: 6px;
+            padding: 8px 10px;
+        }
+
+        .tp-box-head {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--teal-deep);
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+
+        /* Fee Settings bar */
+        .fee-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #e2d7ba;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--ink-text);
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .fee-bar label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+
+        .fee-bar input[type="checkbox"] {
+            accent-color: var(--teal-deep);
+            cursor: pointer;
+        }
+
+        .custom-rate {
+            margin-top: 6px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Cutout Perforation */
+        .perforation {
+            height: 0;
+            border-top: 2px dashed var(--paper-line);
+            margin: 18px 0 0;
+            position: relative;
+        }
+
+        .perforation::before,
+        .perforation::after {
+            content: "";
+            position: absolute;
+            top: -12px;
+            width: 24px;
+            height: 24px;
+            background: var(--ink);
+            border-radius: 50%;
+        }
+
+        .perforation::before {
+            left: -12px;
+        }
+
+        .perforation::after {
+            right: -12px;
+        }
+
+        /* ---- Results Stub ---- */
+        .stub {
+            background: var(--paper-2);
+            padding: 22px 28px 24px;
+            position: relative;
+        }
+
+        @media (max-width:640px) {
+            .stub {
+                padding: 18px 16px 20px;
+            }
+        }
+
+        .stub-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .stub-head h2 {
+            font-family: 'Fraunces', serif;
+            font-size: 17px;
+            font-weight: 600;
+            margin: 0;
+            letter-spacing: 0.01em;
+            color: var(--ink-text);
+        }
+
+        .stamp {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            border-radius: 4px;
+            border: 2px solid currentColor;
+            transform: rotate(-2deg);
+            opacity: 0;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+
+        .stamp.show {
+            opacity: 1;
+        }
+
+        .stamp.ok {
+            color: var(--teal-deep);
+        }
+
+        .stamp.warn {
+            color: var(--red);
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        @media (max-width:768px) {
+            .results-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width:480px) {
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .result-card {
+            background: var(--paper);
+            border: 1.5px solid var(--paper-line);
+            border-radius: 8px;
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .result-card .rc-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9.5px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--paper-muted);
+            margin-bottom: 4px;
+        }
+
+        .result-card .rc-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 19px;
+            font-weight: 700;
+            color: var(--ink-text);
+            line-height: 1.15;
+        }
+
+        .result-card .rc-sub {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 3px;
+        }
+
+        .result-card.primary {
+            background: var(--teal-deep);
+            border-color: var(--teal-deep);
+        }
+
+        .result-card.primary .rc-label {
+            color: rgba(242, 234, 216, 0.7);
+        }
+
+        .result-card.primary .rc-value {
+            color: var(--paper);
+            font-size: 20px;
+        }
+
+        .result-card.primary .rc-sub {
+            color: rgba(242, 234, 216, 0.8);
+        }
+
+        .result-card.alert-lev {
+            border-color: var(--red);
+            background: #fdf3f2;
+        }
+
+        .result-card.alert-lev .rc-sub {
+            color: var(--red);
+            font-weight: 600;
+        }
+
+        .gauge-wrap {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: var(--paper);
+            border: 1.5px solid var(--paper-line);
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-bottom: 12px;
+        }
+
+        .gauge-track {
+            flex: 1;
+            height: 7px;
+            background: #ddd2ae;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .gauge-fill {
+            height: 100%;
+            background: var(--teal-deep);
+            width: 0%;
+            transition: width 0.3s ease, background 0.3s ease;
+        }
+
+        .gauge-fill.over {
+            background: var(--red);
+        }
+
+        .gauge-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10.5px;
+            color: var(--muted);
+            white-space: nowrap;
+        }
+
+        .actions-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding-top: 4px;
+        }
+
+        .btn-copy {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 7px 14px;
+            background: var(--ink);
+            color: var(--paper);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.15s ease;
+        }
+
+        .btn-copy:hover {
+            background: var(--ink-2);
+        }
+
+        .btn-copy:active {
+            transform: scale(0.98);
+        }
+
+        .footnote {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10.5px;
+            color: var(--paper-muted);
+            line-height: 1.4;
+        }
+
+        .hotkey-legend {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 18px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10.5px;
+            color: #768199;
+        }
+
+        .hotkey-legend kbd {
+            background: #192742;
+            padding: 2px 6px;
+            border-radius: 3px;
+            border: 1px solid #2f3d5c;
+            color: #e2d7ba;
+        }
+    </style>
 </head>
+
 <body>
 
-  <div class="masthead">
-    <div class="eyebrow">Risk Desk · Position Sizing</div>
-    <h1>Order Ticket</h1>
-    <p>Fill it out like a trader would. Set your capital, your exchange's ₹/$ rate, how much of the account you'll risk, and your stop-loss distance — the ticket does the rest.</p>
-  </div>
-
-  <div class="desk">
-    <div class="ticket">
-      <div class="ticket-top">
-        <div>
-          <div class="ticket-id">TICKET NO. — LIVE</div>
-          <div class="ticket-title">Position Size Worksheet</div>
-        </div>
-        <div class="ticket-tag" id="statusTag">Awaiting entry</div>
-      </div>
-
-      <div class="ticket-body">
-        <div class="field full">
-          <label for="capital">Trading Capital <span class="hint">in ₹ (INR)</span></label>
-          <div class="input-row">
-            <span class="prefix">₹</span>
-            <input type="number" id="capital" placeholder="100000" min="0" step="100" inputmode="decimal">
-          </div>
-        </div>
-
-        <div class="field full">
-          <label>Exchange Rate <span class="hint">₹ per $1</span></label>
-          <div class="rate-toggle" id="rateToggle">
-            <button type="button" class="rate-btn active" data-rate="85">₹85</button>
-            <button type="button" class="rate-btn" data-rate="102">₹102</button>
-            <button type="button" class="rate-btn" data-rate="custom">Custom</button>
-          </div>
-          <div class="input-row custom-rate hidden" id="customRateRow">
-            <span class="prefix">₹</span>
-            <input type="number" id="customRate" placeholder="e.g. 89.5" min="0" step="0.01" inputmode="decimal">
-            <span class="suffix">/ $1</span>
-          </div>
-        </div>
-
-        <div class="field">
-          <label>Max Risk Per Trade <span class="hint" id="riskPctLabel">1%</span></label>
-          <div class="slider-row">
-            <input type="range" id="riskPct" min="0.1" max="10" step="0.1" value="1">
-          </div>
-        </div>
-
-        <div class="field">
-          <label>Stop-Loss Distance <span class="hint">from entry</span></label>
-          <div class="slider-row">
-            <input type="range" id="slPctSlider" min="0.1" max="20" step="0.1" value="2">
-            <div class="precise-input">
-              <input type="number" id="slPct" min="0.01" max="20" step="0.01" value="2.00" inputmode="decimal">
-              <span class="suffix">%</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="perforation"></div>
-
-      <div class="stub">
-        <div class="stub-head">
-          <h2>Calculated Position</h2>
-          <div class="stamp ok" id="stamp">Sized</div>
-        </div>
-
-        <div class="results-grid">
-          <div class="result-card primary">
-            <div class="rc-label">Risk Amount</div>
-            <div class="rc-value" id="riskInr">₹0</div>
-            <div class="rc-sub" id="riskUsd">$0.00</div>
-          </div>
-          <div class="result-card primary">
-            <div class="rc-label">Position Size</div>
-            <div class="rc-value" id="posUsd">$0.00</div>
-            <div class="rc-sub" id="posInr">₹0</div>
-          </div>
-          <div class="result-card">
-            <div class="rc-label">Capital in USD</div>
-            <div class="rc-value" id="capUsd">$0.00</div>
-            <div class="rc-sub">at current rate</div>
-          </div>
-          <div class="result-card">
-            <div class="rc-label">Position as % of Capital</div>
-            <div class="rc-value" id="posPct">0%</div>
-            <div class="rc-sub" id="leverageNote">no leverage needed</div>
-          </div>
-        </div>
-
-        <div class="gauge-wrap">
-          <div class="gauge-label">Risk used</div>
-          <div class="gauge-track"><div class="gauge-fill" id="gaugeFill"></div></div>
-          <div class="gauge-label" id="gaugeText">1.0%</div>
-        </div>
-
-        <div class="footnote" id="footnote">
-          Risk Amount = Capital × Risk% &nbsp;·&nbsp; Position Size = Risk Amount ÷ SL%
-        </div>
-      </div>
+    <div class="masthead">
+        <div class="eyebrow">Risk Desk · Advanced Sizing</div>
+        <h1>Order Ticket</h1>
+        <p>Complete execution worksheet with partial take-profits, fee buffers, and multi-currency position sizing.</p>
     </div>
-  </div>
 
-  <div class="signature">— fill in the blanks, the ticket recalculates as you type —</div>
+    <div class="desk">
+        <div class="ticket">
 
-<script>
-(function(){
-  const capitalEl = document.getElementById('capital');
-  const riskPctEl = document.getElementById('riskPct');
-  const slPctEl = document.getElementById('slPct');
-  const slPctSlider = document.getElementById('slPctSlider');
-  const riskPctLabel = document.getElementById('riskPctLabel');
-  const customRateRow = document.getElementById('customRateRow');
-  const customRateEl = document.getElementById('customRate');
-  const rateButtons = document.querySelectorAll('.rate-btn');
-  const statusTag = document.getElementById('statusTag');
-  const stamp = document.getElementById('stamp');
-  const gaugeFill = document.getElementById('gaugeFill');
-  const gaugeText = document.getElementById('gaugeText');
+            <div class="ticket-top">
+                <div>
+                    <div class="ticket-id" id="ticketId">TICKET NO. — LIVE</div>
+                    <div class="ticket-title">Position Size Worksheet</div>
+                </div>
+                <div class="top-tags">
+                    <div class="ticket-tag" id="statusTag">Ready</div>
+                </div>
+            </div>
 
-  let currentRate = 85;
+            <!-- Long/Short & Mode Selectors -->
+            <div class="control-strip">
+                <div class="pill-group" id="dirGroup">
+                    <button type="button" class="pill-btn long active" data-dir="LONG">▲ Long (Alt+L)</button>
+                    <button type="button" class="pill-btn short" data-dir="SHORT">▼ Short (Alt+S)</button>
+                </div>
 
-  function fmtInr(n){
-    if(!isFinite(n)) n = 0;
-    return '₹' + n.toLocaleString('en-IN', {maximumFractionDigits:2});
-  }
-  function fmtUsd(n){
-    if(!isFinite(n)) n = 0;
-    return '$' + n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-  }
+                <div class="pill-group" id="modeGroup">
+                    <button type="button" class="pill-btn active" data-mode="price">Price Mode</button>
+                    <button type="button" class="pill-btn" data-mode="percent">% Distance</button>
+                </div>
+            </div>
 
-  rateButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      rateButtons.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      if(btn.dataset.rate === 'custom'){
-        customRateRow.classList.remove('hidden');
-        currentRate = parseFloat(customRateEl.value) || 0;
-        customRateEl.focus();
-      } else {
-        customRateRow.classList.add('hidden');
-        currentRate = parseFloat(btn.dataset.rate);
-      }
-      calculate();
-    });
-  });
+            <div class="ticket-body">
 
-  customRateEl.addEventListener('input', () => {
-    currentRate = parseFloat(customRateEl.value) || 0;
-    calculate();
-  });
+                <!-- Enhanced Capital Field -->
+                <div class="field">
+                    <label for="capital">
+                        Trading Capital
+                        <span class="badge-words" id="capitalWords">₹1 Lakh</span>
+                    </label>
+                    <div class="chip-group" id="capitalChips" style="margin-bottom:2px;">
+                        <button type="button" class="chip-btn" data-cap="50000">50K</button>
+                        <button type="button" class="chip-btn active" data-cap="100000">1L</button>
+                        <button type="button" class="chip-btn" data-cap="200000">2L</button>
+                        <button type="button" class="chip-btn" data-cap="500000">5L</button>
+                        <button type="button" class="chip-btn" data-cap="1000000">10L</button>
+                        <button type="button" class="chip-btn" data-cap="2500000">25L</button>
+                    </div>
+                    <div class="input-row">
+                        <span class="prefix">₹</span>
+                        <input type="text" id="capital" placeholder="1,00,000" inputmode="numeric">
+                    </div>
+                </div>
 
-  function calculate(){
-    const capital = parseFloat(capitalEl.value) || 0;
-    const riskPct = parseFloat(riskPctEl.value) || 0;
-    const slPct = parseFloat(slPctEl.value) || 0;
-    const rate = currentRate > 0 ? currentRate : 0;
+                <!-- Exchange Rate Field -->
+                <div class="field">
+                    <label>Exchange Rate <span class="hint">₹ per $1</span></label>
+                    <div class="chip-group" id="rateToggle" style="margin-bottom:2px;">
+                        <button type="button" class="chip-btn active" data-rate="85">₹85</button>
+                        <button type="button" class="chip-btn" data-rate="90">₹90</button>
+                        <button type="button" class="chip-btn" data-rate="102">₹102</button>
+                        <button type="button" class="chip-btn" data-rate="custom">Custom</button>
+                    </div>
+                    <div class="input-row custom-rate hidden" id="customRateRow">
+                        <span class="prefix">₹</span>
+                        <input type="number" id="customRate" placeholder="e.g. 89.5" min="0" step="0.01"
+                            inputmode="decimal">
+                        <span class="suffix">/ $1</span>
+                    </div>
+                </div>
 
-    riskPctLabel.textContent = riskPct.toFixed(1) + '%';
+                <!-- Risk Percentage Field -->
+                <div class="field full">
+                    <label>Risk Per Trade <span class="hint" id="riskPctLabel">1.0%</span></label>
+                    <div class="chip-group" id="riskChips" style="margin-bottom:6px;">
+                        <button type="button" class="chip-btn" data-risk="0.5">0.5% (Alt+1)</button>
+                        <button type="button" class="chip-btn" data-risk="0.9">0.9% (Alt+2)</button>
+                        <button type="button" class="chip-btn active" data-risk="1.0">1.0% (Alt+3)</button>
+                        <button type="button" class="chip-btn" data-risk="1.4">1.4% (Alt+4)</button>
+                        <button type="button" class="chip-btn" data-risk="1.9">1.90%</button>
+                        <button type="button" class="chip-btn" data-risk="2.0">2.0%</button>
+                    </div>
+                    <div class="slider-row">
+                        <input type="range" id="riskPct" min="0.1" max="10" step="0.05" value="1.0">
+                    </div>
+                </div>
 
-    const riskAmountInr = capital * (riskPct / 100);
-    const riskAmountUsd = rate > 0 ? riskAmountInr / rate : 0;
+                <!-- Dynamic Inputs: Price Mode -->
+                <div id="priceFields" class="field full"
+                    style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+                    <div class="field">
+                        <label for="entryPrice">Entry Price <span class="hint">USD ($)</span></label>
+                        <div class="input-row">
+                            <span class="prefix">$</span>
+                            <input type="number" id="entryPrice" placeholder="100.00" step="any" inputmode="decimal">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="stopPrice">Stop-Loss Price <span class="hint">USD ($)</span></label>
+                        <div class="input-row">
+                            <span class="prefix">$</span>
+                            <input type="number" id="stopPrice" placeholder="98.00" step="any" inputmode="decimal">
+                        </div>
+                    </div>
 
-    const positionInr = slPct > 0 ? riskAmountInr / (slPct / 100) : 0;
-    const positionUsd = rate > 0 ? positionInr / rate : 0;
+                    <!-- Split Partial Targets -->
+                    <div class="field full">
+                        <label>Split Take-Profit Targets <span class="hint">TP1: 50% · TP2: 30% · TP3:
+                                20%</span></label>
+                        <div class="tp-grid">
+                            <div class="tp-box">
+                                <div class="tp-box-head"><span>TP1 (50%)</span><span id="tp1Rr">1:—</span></div>
+                                <div class="input-row">
+                                    <span class="prefix">$</span>
+                                    <input type="number" id="tp1Price" placeholder="104.00" step="any"
+                                        inputmode="decimal">
+                                </div>
+                            </div>
+                            <div class="tp-box">
+                                <div class="tp-box-head"><span>TP2 (30%)</span><span id="tp2Rr">1:—</span></div>
+                                <div class="input-row">
+                                    <span class="prefix">$</span>
+                                    <input type="number" id="tp2Price" placeholder="106.00" step="any"
+                                        inputmode="decimal">
+                                </div>
+                            </div>
+                            <div class="tp-box">
+                                <div class="tp-box-head"><span>TP3 (20%)</span><span id="tp3Rr">1:—</span></div>
+                                <div class="input-row">
+                                    <span class="prefix">$</span>
+                                    <input type="number" id="tp3Price" placeholder="110.00" step="any"
+                                        inputmode="decimal">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-    const capitalUsd = rate > 0 ? capital / rate : 0;
-    const posPctOfCapital = capital > 0 ? (positionInr / capital) * 100 : 0;
+                <!-- Dynamic Inputs: Percent Mode -->
+                <div id="percentFields" class="field full hidden">
+                    <label>Stop-Loss Distance <span class="hint">from entry</span></label>
+                    <div class="slider-row">
+                        <input type="range" id="slPctSlider" min="0.1" max="20" step="0.1" value="2.0">
+                        <div class="precise-input">
+                            <input type="number" id="slPct" min="0.01" max="50" step="0.01" value="2.00"
+                                inputmode="decimal">
+                            <span class="suffix">%</span>
+                        </div>
+                    </div>
+                </div>
 
-    document.getElementById('riskInr').textContent = fmtInr(riskAmountInr);
-    document.getElementById('riskUsd').textContent = fmtUsd(riskAmountUsd);
-    document.getElementById('posUsd').textContent = fmtUsd(positionUsd);
-    document.getElementById('posInr').textContent = fmtInr(positionInr);
-    document.getElementById('capUsd').textContent = fmtUsd(capitalUsd);
-    document.getElementById('posPct').textContent = posPctOfCapital.toFixed(1) + '%';
+                <!-- Fee & Slippage Toggle Bar -->
+                <div class="field full">
+                    <div class="fee-bar">
+                        <label>
+                            <input type="checkbox" id="includeFees" checked>
+                            Deduct Round-Trip Exchange Fees (0.05% Taker × 2)
+                        </label>
+                        <span id="feeSummary" style="color:var(--muted)">Est. Cost: $0.00</span>
+                    </div>
+                </div>
 
-    const leverageNote = document.getElementById('leverageNote');
-    if(posPctOfCapital > 100){
-      leverageNote.textContent = (posPctOfCapital/100).toFixed(2) + '× leverage required';
-    } else {
-      leverageNote.textContent = 'no leverage needed';
-    }
+            </div>
 
-    const gaugePct = Math.min(riskPct / 5 * 100, 100); // gauge maxes visually at 5% risk
-    gaugeFill.style.width = gaugePct + '%';
-    gaugeText.textContent = riskPct.toFixed(1) + '%';
+            <div class="perforation"></div>
 
-    if(riskPct > 2){
-      gaugeFill.classList.add('over');
-      stamp.classList.remove('ok');
-      stamp.classList.add('warn');
-      stamp.textContent = 'High Risk';
-      statusTag.textContent = 'Exceeds comfort zone';
-      statusTag.style.color = 'var(--red)';
-      statusTag.style.borderColor = 'var(--red)';
-    } else {
-      gaugeFill.classList.remove('over');
-      stamp.classList.remove('warn');
-      stamp.classList.add('ok');
-      stamp.textContent = 'Sized';
-      statusTag.textContent = capital > 0 ? 'Within risk limit' : 'Awaiting entry';
-      statusTag.style.color = '';
-      statusTag.style.borderColor = '';
-    }
-    stamp.classList.add('show');
+            <!-- Calculation Stub -->
+            <div class="stub">
+                <div class="stub-head">
+                    <h2>Order Sizing & Yield Summary</h2>
+                    <div class="stamp ok" id="stamp">Sized</div>
+                </div>
 
-    document.getElementById('footnote').innerHTML =
-      'Risk Amount = ' + fmtInr(capital) + ' × ' + riskPct.toFixed(1) + '% &nbsp;·&nbsp; ' +
-      'Position Size = ' + fmtInr(riskAmountInr) + ' ÷ ' + slPct.toFixed(2) + '% &nbsp;·&nbsp; ' +
-      'Rate used: ₹' + (rate || 0) + ' / $1';
-  }
+                <div class="results-grid">
+                    <!-- Position Size (Primary) -->
+                    <div class="result-card primary">
+                        <div class="rc-label">Position Size</div>
+                        <div class="rc-value" id="posUsd">$0.00</div>
+                        <div class="rc-sub" id="posInr">₹0</div>
+                    </div>
 
-  slPctSlider.addEventListener('input', () => {
-    slPctEl.value = parseFloat(slPctSlider.value).toFixed(2);
-    calculate();
-  });
-  slPctEl.addEventListener('input', () => {
-    const v = parseFloat(slPctEl.value);
-    if(!isNaN(v)){
-      slPctSlider.value = Math.min(Math.max(v, 0.1), 20);
-    }
-    calculate();
-  });
+                    <!-- Risk Amount -->
+                    <div class="result-card">
+                        <div class="rc-label">Net Max Risk</div>
+                        <div class="rc-value" id="riskInr">₹0</div>
+                        <div class="rc-sub" id="riskUsd">$0.00</div>
+                    </div>
 
-  [capitalEl, riskPctEl].forEach(el => el.addEventListener('input', calculate));
+                    <!-- Quantity / Contract Count -->
+                    <div class="result-card">
+                        <div class="rc-label">Order Quantity</div>
+                        <div class="rc-value" id="qtyVal">—</div>
+                        <div class="rc-sub" id="qtySub">units / shares</div>
+                    </div>
 
-  // sensible starting values
-  capitalEl.value = 100000;
-  calculate();
-})();
-</script>
+                    <!-- Blended R:R Ratio -->
+                    <div class="result-card">
+                        <div class="rc-label">Blended R:R (Net)</div>
+                        <div class="rc-value" id="rrVal">1 : —</div>
+                        <div class="rc-sub" id="beSub">Break-Even: $—</div>
+                    </div>
+
+                    <!-- Net Profit Potential -->
+                    <div class="result-card">
+                        <div class="rc-label">Est. Net Profit (All TPs)</div>
+                        <div class="rc-value" id="profitVal">$0.00</div>
+                        <div class="rc-sub" id="profitInr">₹0</div>
+                    </div>
+
+                    <!-- Leverage Required -->
+                    <div class="result-card" id="levCard">
+                        <div class="rc-label">Capital Utilization</div>
+                        <div class="rc-value" id="posPct">0%</div>
+                        <div class="rc-sub" id="leverageNote">no leverage needed</div>
+                    </div>
+                </div>
+
+                <div class="gauge-wrap">
+                    <div class="gauge-label">Risk Budget</div>
+                    <div class="gauge-track">
+                        <div class="gauge-fill" id="gaugeFill"></div>
+                    </div>
+                    <div class="gauge-label" id="gaugeText">1.0%</div>
+                </div>
+
+                <div class="actions-row">
+                    <div class="footnote" id="footnote">
+                        SL Distance: 0.00% · Position = Risk ÷ SL%
+                    </div>
+                    <button type="button" class="btn-copy" id="btnCopy">📋 Copy Ticket (Alt+C)</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="hotkey-legend">
+        <span><kbd>Alt</kbd>+<kbd>L</kbd> Long</span>
+        <span><kbd>Alt</kbd>+<kbd>S</kbd> Short</span>
+        <span><kbd>Alt</kbd>+<kbd>1-4</kbd> Risk Presets</span>
+        <span><kbd>Alt</kbd>+<kbd>C</kbd> Copy Ticket</span>
+    </div>
+
+    <script>
+        (function () {
+            // DOM Elements
+            const capitalEl = document.getElementById('capital');
+            const capitalWordsEl = document.getElementById('capitalWords');
+            const capitalChips = document.querySelectorAll('#capitalChips .chip-btn');
+
+            const riskPctEl = document.getElementById('riskPct');
+            const riskPctLabel = document.getElementById('riskPctLabel');
+            const riskChips = document.querySelectorAll('#riskChips .chip-btn');
+
+            const customRateRow = document.getElementById('customRateRow');
+            const customRateEl = document.getElementById('customRate');
+            const rateButtons = document.querySelectorAll('#rateToggle .chip-btn');
+
+            const dirButtons = document.querySelectorAll('#dirGroup .pill-btn');
+            const modeButtons = document.querySelectorAll('#modeGroup .pill-btn');
+            const priceFields = document.getElementById('priceFields');
+            const percentFields = document.getElementById('percentFields');
+
+            const entryPriceEl = document.getElementById('entryPrice');
+            const stopPriceEl = document.getElementById('stopPrice');
+            const tp1PriceEl = document.getElementById('tp1Price');
+            const tp2PriceEl = document.getElementById('tp2Price');
+            const tp3PriceEl = document.getElementById('tp3Price');
+            const includeFeesEl = document.getElementById('includeFees');
+
+            const slPctEl = document.getElementById('slPct');
+            const slPctSlider = document.getElementById('slPctSlider');
+
+            const statusTag = document.getElementById('statusTag');
+            const stamp = document.getElementById('stamp');
+            const gaugeFill = document.getElementById('gaugeFill');
+            const gaugeText = document.getElementById('gaugeText');
+            const levCard = document.getElementById('levCard');
+            const btnCopy = document.getElementById('btnCopy');
+
+            // State
+            let currentRate = 85;
+            let currentDirection = 'LONG';
+            let currentMode = 'price';
+            let lastCalculatedState = {};
+
+            function fmtInr(n) {
+                if (!isFinite(n) || isNaN(n)) n = 0;
+                return '₹' + Math.round(n).toLocaleString('en-IN');
+            }
+            function fmtUsd(n) {
+                if (!isFinite(n) || isNaN(n)) n = 0;
+                return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            }
+
+            // Convert number to Indian Denominations
+            function formatIndianWords(num) {
+                if (!num || num <= 0) return '₹0';
+                if (num >= 10000000) {
+                    const cr = num / 10000000;
+                    return `₹${cr % 1 === 0 ? cr : cr.toFixed(2)} Crore${cr > 1 ? 's' : ''}`;
+                }
+                if (num >= 100000) {
+                    const lk = num / 100000;
+                    return `₹${lk % 1 === 0 ? lk : lk.toFixed(2)} Lakh${lk > 1 ? 's' : ''}`;
+                }
+                if (num >= 1000) {
+                    const k = num / 1000;
+                    return `₹${k % 1 === 0 ? k : k.toFixed(1)}k`;
+                }
+                return '₹' + num.toLocaleString('en-IN');
+            }
+
+            function getRawCapital() {
+                return parseFloat(String(capitalEl.value).replace(/,/g, '')) || 0;
+            }
+
+            function syncCapitalChips(currentVal) {
+                capitalChips.forEach(btn => {
+                    btn.classList.toggle('active', parseFloat(btn.dataset.cap) === currentVal);
+                });
+            }
+
+            // Capital Input Live Auto-Comma Formatting
+            capitalEl.addEventListener('input', () => {
+                let clean = capitalEl.value.replace(/[^0-9]/g, '');
+                if (clean) {
+                    let num = parseInt(clean, 10);
+                    capitalEl.value = num.toLocaleString('en-IN');
+                    capitalWordsEl.textContent = formatIndianWords(num);
+                    syncCapitalChips(num);
+                } else {
+                    capitalWordsEl.textContent = '₹0';
+                    syncCapitalChips(0);
+                }
+                calculate();
+            });
+
+            // Capital Preset Chips
+            capitalChips.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const val = parseFloat(btn.dataset.cap);
+                    capitalEl.value = val.toLocaleString('en-IN');
+                    capitalWordsEl.textContent = formatIndianWords(val);
+                    syncCapitalChips(val);
+                    calculate();
+                });
+            });
+
+            // Direction Toggle
+            function setDirection(dir) {
+                currentDirection = dir;
+                dirButtons.forEach(b => b.classList.toggle('active', b.dataset.dir === dir));
+                calculate();
+            }
+            dirButtons.forEach(btn => btn.addEventListener('click', () => setDirection(btn.dataset.dir)));
+
+            // Mode Toggle
+            modeButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    modeButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentMode = btn.dataset.mode;
+                    if (currentMode === 'price') {
+                        priceFields.classList.remove('hidden');
+                        percentFields.classList.add('hidden');
+                    } else {
+                        priceFields.classList.add('hidden');
+                        percentFields.classList.remove('hidden');
+                    }
+                    calculate();
+                });
+            });
+
+            // Rate Toggle
+            rateButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    rateButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    if (btn.dataset.rate === 'custom') {
+                        customRateRow.classList.remove('hidden');
+                        currentRate = parseFloat(customRateEl.value) || 0;
+                        customRateEl.focus();
+                    } else {
+                        customRateRow.classList.add('hidden');
+                        currentRate = parseFloat(btn.dataset.rate);
+                    }
+                    calculate();
+                });
+            });
+
+            customRateEl.addEventListener('input', () => {
+                currentRate = parseFloat(customRateEl.value) || 0;
+                calculate();
+            });
+
+            // Risk Preset Selection
+            function setRiskPreset(val) {
+                riskPctEl.value = val;
+                riskChips.forEach(b => {
+                    b.classList.toggle('active', parseFloat(b.dataset.risk) === parseFloat(val));
+                });
+                calculate();
+            }
+            riskChips.forEach(btn => btn.addEventListener('click', () => setRiskPreset(btn.dataset.risk)));
+
+            riskPctEl.addEventListener('input', () => {
+                const val = parseFloat(riskPctEl.value);
+                riskChips.forEach(b => b.classList.toggle('active', parseFloat(b.dataset.risk) === val));
+                calculate();
+            });
+
+            // SL Distance sync
+            slPctSlider.addEventListener('input', () => {
+                slPctEl.value = parseFloat(slPctSlider.value).toFixed(2);
+                calculate();
+            });
+            slPctEl.addEventListener('input', () => {
+                const v = parseFloat(slPctEl.value);
+                if (!isNaN(v)) {
+                    slPctSlider.value = Math.min(Math.max(v, 0.1), 20);
+                }
+                calculate();
+            });
+
+            // Calculation Engine
+            function calculate() {
+                const capital = getRawCapital();
+                const riskPct = parseFloat(riskPctEl.value) || 0;
+                const rate = currentRate > 0 ? currentRate : 85;
+                const deductFees = includeFeesEl.checked;
+
+                riskPctLabel.textContent = riskPct.toFixed(2) + '%';
+
+                let effectiveSlPct = 0;
+                let units = 0;
+                let isValidTrade = true;
+                let validationMsg = 'Sized';
+
+                const entry = parseFloat(entryPriceEl.value) || 0;
+                const stop = parseFloat(stopPriceEl.value) || 0;
+                const tp1 = parseFloat(tp1PriceEl.value) || 0;
+                const tp2 = parseFloat(tp2PriceEl.value) || 0;
+                const tp3 = parseFloat(tp3PriceEl.value) || 0;
+
+                if (currentMode === 'price') {
+                    if (entry > 0 && stop > 0) {
+                        if (currentDirection === 'LONG') {
+                            if (stop >= entry) {
+                                isValidTrade = false;
+                                validationMsg = 'SL must be below entry';
+                            } else {
+                                effectiveSlPct = ((entry - stop) / entry) * 100;
+                            }
+                        } else { // SHORT
+                            if (stop <= entry) {
+                                isValidTrade = false;
+                                validationMsg = 'SL must be above entry';
+                            } else {
+                                effectiveSlPct = ((stop - entry) / entry) * 100;
+                            }
+                        }
+                    }
+                } else {
+                    effectiveSlPct = parseFloat(slPctEl.value) || 0;
+                }
+
+                const riskAmountInr = capital * (riskPct / 100);
+                const riskAmountUsd = rate > 0 ? riskAmountInr / rate : 0;
+
+                let positionInr = 0;
+                let positionUsd = 0;
+
+                if (effectiveSlPct > 0 && isValidTrade) {
+                    positionInr = riskAmountInr / (effectiveSlPct / 100);
+                    positionUsd = rate > 0 ? positionInr / rate : 0;
+                    if (entry > 0 && currentMode === 'price') {
+                        units = positionUsd / entry;
+                    }
+                }
+
+                // Fee estimation (0.05% taker × 2 for entry + exit)
+                const roundTripFeePct = deductFees ? 0.001 : 0.0;
+                const feeCostUsd = positionUsd * roundTripFeePct;
+                document.getElementById('feeSummary').textContent = `Est. Cost: ${fmtUsd(feeCostUsd)}`;
+
+                // Break-even price calculation
+                let breakEvenPrice = 0;
+                if (entry > 0) {
+                    breakEvenPrice = currentDirection === 'LONG'
+                        ? entry * (1 + roundTripFeePct)
+                        : entry * (1 - roundTripFeePct);
+                    document.getElementById('beSub').textContent = `Break-Even: $${breakEvenPrice.toFixed(2)}`;
+                } else {
+                    document.getElementById('beSub').textContent = 'Break-Even: $—';
+                }
+
+                // Take-Profit & Blended R:R calculations
+                const slDistUsd = Math.abs(entry - stop);
+                let weightedProfitUsd = 0;
+                let activeTargetsWeight = 0;
+
+                function calcTp(tpVal, weight, labelElId) {
+                    const labelEl = document.getElementById(labelElId);
+                    if (entry > 0 && stop > 0 && tpVal > 0) {
+                        const isTpValid = currentDirection === 'LONG' ? tpVal > entry : tpVal < entry;
+                        if (isTpValid && slDistUsd > 0) {
+                            const targetDist = Math.abs(tpVal - entry);
+                            const ratio = targetDist / slDistUsd;
+                            labelEl.textContent = `1:${ratio.toFixed(2)}`;
+                            weightedProfitUsd += (units * weight) * targetDist;
+                            activeTargetsWeight += weight;
+                            return ratio;
+                        }
+                    }
+                    labelEl.textContent = '1:—';
+                    return null;
+                }
+
+                calcTp(tp1, 0.50, 'tp1Rr');
+                calcTp(tp2, 0.30, 'tp2Rr');
+                calcTp(tp3, 0.20, 'tp3Rr');
+
+                // Net Profit & Net R:R
+                const netProfitUsd = Math.max(0, weightedProfitUsd - feeCostUsd);
+                const netProfitInr = netProfitUsd * rate;
+                document.getElementById('profitVal').textContent = fmtUsd(netProfitUsd);
+                document.getElementById('profitInr').textContent = fmtInr(netProfitInr);
+
+                if (riskAmountUsd > 0 && activeTargetsWeight > 0) {
+                    const netBlendedRr = netProfitUsd / (riskAmountUsd + feeCostUsd);
+                    document.getElementById('rrVal').textContent = `1 : ${netBlendedRr.toFixed(2)}`;
+                } else {
+                    document.getElementById('rrVal').textContent = '1 : —';
+                }
+
+                const capitalUsd = rate > 0 ? capital / rate : 0;
+                const posPctOfCapital = capital > 0 ? (positionInr / capital) * 100 : 0;
+
+                // Output formatting
+                document.getElementById('riskInr').textContent = fmtInr(riskAmountInr + (feeCostUsd * rate));
+                document.getElementById('riskUsd').textContent = fmtUsd(riskAmountUsd + feeCostUsd);
+                document.getElementById('posUsd').textContent = fmtUsd(positionUsd);
+                document.getElementById('posInr').textContent = fmtInr(positionInr);
+                document.getElementById('capUsd').textContent = fmtUsd(capitalUsd);
+                document.getElementById('posPct').textContent = posPctOfCapital.toFixed(1) + '%';
+
+                // Quantity display
+                if (units > 0) {
+                    document.getElementById('qtyVal').textContent = units >= 10 ? units.toFixed(2) : units.toFixed(4);
+                    document.getElementById('qtySub').textContent = `@ $${entry.toFixed(2)} / unit`;
+                } else {
+                    document.getElementById('qtyVal').textContent = '—';
+                    document.getElementById('qtySub').textContent = currentMode === 'price' ? 'Enter entry price' : 'N/A in % mode';
+                }
+
+                // Leverage warning
+                const leverageNote = document.getElementById('leverageNote');
+                if (posPctOfCapital > 100) {
+                    const lev = (posPctOfCapital / 100).toFixed(2);
+                    leverageNote.textContent = `${lev}× leverage required`;
+                    levCard.classList.add('alert-lev');
+                } else {
+                    leverageNote.textContent = 'no leverage needed';
+                    levCard.classList.remove('alert-lev');
+                }
+
+                // Risk Gauge
+                const gaugePct = Math.min((riskPct / 5) * 100, 100);
+                gaugeFill.style.width = gaugePct + '%';
+                gaugeText.textContent = riskPct.toFixed(2) + '%';
+
+                // Validation Status
+                if (!isValidTrade) {
+                    stamp.className = 'stamp warn show';
+                    stamp.textContent = 'Invalid Setup';
+                    statusTag.textContent = validationMsg;
+                    statusTag.style.color = 'var(--red)';
+                    statusTag.style.borderColor = 'var(--red)';
+                } else if (riskPct > 2) {
+                    gaugeFill.classList.add('over');
+                    stamp.className = 'stamp warn show';
+                    stamp.textContent = 'High Risk';
+                    statusTag.textContent = 'Risk > 2%';
+                    statusTag.style.color = 'var(--red)';
+                    statusTag.style.borderColor = 'var(--red)';
+                } else {
+                    gaugeFill.classList.remove('over');
+                    stamp.className = 'stamp ok show';
+                    stamp.textContent = 'Sized';
+                    statusTag.textContent = capital > 0 ? `${currentDirection} Ready` : 'Awaiting entry';
+                    statusTag.style.color = '';
+                    statusTag.style.borderColor = '';
+                }
+
+                document.getElementById('footnote').innerHTML =
+                    `SL Distance: ${effectiveSlPct.toFixed(2)}% &nbsp;·&nbsp; ` +
+                    `Break-even: $${breakEvenPrice.toFixed(2)} &nbsp;·&nbsp; ` +
+                    `Rate used: ₹${rate}/$1`;
+
+                // Save state for copying
+                lastCalculatedState = {
+                    direction: currentDirection,
+                    capitalInr: fmtInr(capital),
+                    riskPct: riskPct.toFixed(2),
+                    riskInr: fmtInr(riskAmountInr + (feeCostUsd * rate)),
+                    riskUsd: fmtUsd(riskAmountUsd + feeCostUsd),
+                    posUsd: fmtUsd(positionUsd),
+                    posInr: fmtInr(positionInr),
+                    units: units > 0 ? (units >= 10 ? units.toFixed(2) : units.toFixed(4)) : null,
+                    entry: entry > 0 ? entry : null,
+                    stop: stop > 0 ? stop : null,
+                    tp1: tp1 > 0 ? tp1 : null,
+                    tp2: tp2 > 0 ? tp2 : null,
+                    tp3: tp3 > 0 ? tp3 : null,
+                    netProfitUsd: fmtUsd(netProfitUsd),
+                    slPct: effectiveSlPct.toFixed(2),
+                    leverage: (posPctOfCapital / 100).toFixed(2)
+                };
+            }
+
+            // Copy Ticket Function
+            function copyTicketSummary() {
+                const s = lastCalculatedState;
+                let summary = `📋 [ORDER TICKET] ${s.direction}\n`;
+                summary += `• Risk: ${s.riskInr} (${s.riskUsd}) — ${s.riskPct}%\n`;
+                summary += `• Size: ${s.posUsd} (${s.posInr})\n`;
+                if (s.units && s.entry) summary += `• Units: ${s.units} @ $${s.entry} (SL: $${s.stop} | -${s.slPct}%)\n`;
+                if (s.tp1 || s.tp2 || s.tp3) {
+                    summary += `• Targets: ${s.tp1 ? 'TP1: $' + s.tp1 + ' ' : ''}${s.tp2 ? 'TP2: $' + s.tp2 + ' ' : ''}${s.tp3 ? 'TP3: $' + s.tp3 : ''}\n`;
+                    summary += `• Est. Net Reward: ${s.netProfitUsd}\n`;
+                }
+                summary += `• Leverage: ${s.leverage}x`;
+
+                navigator.clipboard.writeText(summary).then(() => {
+                    const orig = btnCopy.textContent;
+                    btnCopy.textContent = '✅ Copied!';
+                    setTimeout(() => btnCopy.textContent = orig, 1800);
+                });
+            }
+
+            btnCopy.addEventListener('click', copyTicketSummary);
+
+            // Keyboard Shortcuts
+            window.addEventListener('keydown', (e) => {
+                if (e.altKey) {
+                    if (e.key.toLowerCase() === 'l') { e.preventDefault(); setDirection('LONG'); }
+                    if (e.key.toLowerCase() === 's') { e.preventDefault(); setDirection('SHORT'); }
+                    if (e.key.toLowerCase() === 'c') { e.preventDefault(); copyTicketSummary(); }
+                    if (e.key === '1') { e.preventDefault(); setRiskPreset(0.5); }
+                    if (e.key === '2') { e.preventDefault(); setRiskPreset(0.9); }
+                    if (e.key === '3') { e.preventDefault(); setRiskPreset(1.0); }
+                    if (e.key === '4') { e.preventDefault(); setRiskPreset(1.4); }
+                }
+            });
+
+            // Event Listeners
+            [entryPriceEl, stopPriceEl, tp1PriceEl, tp2PriceEl, tp3PriceEl, includeFeesEl].forEach(el => {
+                el.addEventListener('input', calculate);
+            });
+
+            // Initial defaults
+            capitalEl.value = '1,00,000';
+            capitalWordsEl.textContent = formatIndianWords(100000);
+            entryPriceEl.value = 100;
+            stopPriceEl.value = 98;
+            tp1PriceEl.value = 104;
+            tp2PriceEl.value = 106;
+            tp3PriceEl.value = 110;
+            calculate();
+        })();
+    </script>
 </body>
+
 </html>
