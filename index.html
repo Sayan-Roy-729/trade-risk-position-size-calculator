@@ -44,7 +44,7 @@
             color: var(--paper);
             font-family: 'Inter', sans-serif;
             min-height: 100vh;
-            padding: 36px 16px 80px;
+            padding: 32px 20px 80px;
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -55,8 +55,8 @@
         }
 
         .masthead {
-            max-width: 860px;
-            margin: 0 auto 28px;
+            max-width: 1200px;
+            margin: 0 auto 24px;
             text-align: center;
         }
 
@@ -66,13 +66,13 @@
             letter-spacing: 0.28em;
             text-transform: uppercase;
             color: var(--gold);
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .masthead h1 {
             font-family: 'Fraunces', serif;
             font-weight: 600;
-            font-size: clamp(28px, 4.5vw, 42px);
+            font-size: clamp(28px, 4.5vw, 40px);
             margin: 0 0 8px;
             letter-spacing: -0.01em;
             color: #f4ecd8;
@@ -81,26 +81,42 @@
         .masthead p {
             font-size: 14px;
             color: #a7b0c2;
-            max-width: 580px;
+            max-width: 620px;
             margin: 0 auto;
             line-height: 1.5;
         }
 
+        /* Two-column Ticket Container */
         .desk {
-            max-width: 860px;
+            max-width: 1260px;
             margin: 0 auto;
         }
 
-        /* ---- The Ticket ---- */
-        .ticket {
+        .ticket-wrapper {
             background: var(--paper);
             color: var(--ink-text);
-            border-radius: 14px;
+            border-radius: 16px;
             position: relative;
             box-shadow:
-                0 40px 80px -30px rgba(0, 0, 0, 0.6),
+                0 40px 80px -30px rgba(0, 0, 0, 0.65),
                 0 1px 0 rgba(255, 255, 255, 0.05) inset;
+            display: grid;
+            grid-template-columns: 1.15fr auto 0.95fr;
             overflow: hidden;
+        }
+
+        @media (max-width:1024px) {
+            .ticket-wrapper {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Left Ticket Section */
+        .ticket-main {
+            display: flex;
+            flex-direction: column;
+            background: var(--paper);
+            min-width: 0;
         }
 
         .ticket-top {
@@ -194,16 +210,16 @@
         }
 
         .ticket-body {
-            padding: 22px 28px 10px;
+            padding: 22px 28px 24px;
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 18px 24px;
+            gap: 18px 22px;
         }
 
         @media (max-width:640px) {
             .ticket-body {
                 grid-template-columns: 1fr;
-                padding: 18px 16px 6px;
+                padding: 18px 16px 20px;
             }
 
             .ticket-top,
@@ -216,6 +232,7 @@
             display: flex;
             flex-direction: column;
             gap: 6px;
+            min-width: 0;
         }
 
         .field.full {
@@ -259,6 +276,7 @@
             border-bottom: 2px solid var(--paper-line);
             padding-bottom: 4px;
             transition: border-color 0.15s ease;
+            width: 100%;
         }
 
         .input-row:focus-within {
@@ -275,6 +293,8 @@
         .input-row input[type="number"],
         .input-row input[type="text"] {
             flex: 1;
+            width: 100%;
+            min-width: 0;
             border: none;
             background: transparent;
             outline: none;
@@ -313,6 +333,7 @@
             color: var(--ink-text);
             cursor: pointer;
             transition: all 0.15s ease;
+            white-space: nowrap;
         }
 
         .chip-btn:hover {
@@ -415,9 +436,10 @@
 
         .tp-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 10px;
             margin-top: 4px;
+            width: 100%;
         }
 
         @media (max-width:640px) {
@@ -431,6 +453,7 @@
             border: 1px solid var(--paper-line);
             border-radius: 6px;
             padding: 8px 10px;
+            min-width: 0;
         }
 
         .tp-box-head {
@@ -442,6 +465,7 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 6px;
+            gap: 4px;
         }
 
         .tp-weight-wrap {
@@ -454,7 +478,7 @@
         }
 
         .tp-weight-wrap input[type="number"] {
-            width: 28px;
+            width: 26px;
             border: none;
             background: transparent;
             font-family: 'JetBrains Mono', monospace;
@@ -507,43 +531,72 @@
             display: none !important;
         }
 
-        /* Cutout Perforation */
+        /* ---- Perforation Tear-Line ---- */
         .perforation {
-            height: 0;
-            border-top: 2px dashed var(--paper-line);
-            margin: 18px 0 0;
             position: relative;
+            width: 0;
+            border-left: 2px dashed var(--paper-line);
+            background: var(--paper-2);
         }
 
         .perforation::before,
         .perforation::after {
             content: "";
             position: absolute;
-            top: -12px;
-            width: 24px;
-            height: 24px;
+            width: 22px;
+            height: 22px;
             background: var(--ink);
             border-radius: 50%;
+            left: -11px;
         }
 
         .perforation::before {
-            left: -12px;
+            top: -11px;
         }
 
         .perforation::after {
-            right: -12px;
+            bottom: -11px;
         }
 
-        /* ---- Results Stub ---- */
+        @media (max-width:1024px) {
+            .perforation {
+                width: 100%;
+                height: 0;
+                border-left: none;
+                border-top: 2px dashed var(--paper-line);
+                margin: 0;
+            }
+
+            .perforation::before,
+            .perforation::after {
+                top: -11px;
+                bottom: auto;
+            }
+
+            .perforation::before {
+                left: -11px;
+            }
+
+            .perforation::after {
+                left: auto;
+                right: -11px;
+            }
+        }
+
+        /* ---- Right Summary Stub ---- */
         .stub {
             background: var(--paper-2);
-            padding: 22px 28px 24px;
-            position: relative;
+            padding: 24px 26px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 16px;
+            min-width: 0;
         }
 
         @media (max-width:640px) {
             .stub {
-                padding: 18px 16px 20px;
+                padding: 20px 16px;
             }
         }
 
@@ -551,14 +604,15 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 14px;
             flex-wrap: wrap;
             gap: 8px;
+            border-bottom: 1.5px dashed var(--paper-line);
+            padding-bottom: 14px;
         }
 
         .stub-head h2 {
             font-family: 'Fraunces', serif;
-            font-size: 17px;
+            font-size: 18px;
             font-weight: 600;
             margin: 0;
             letter-spacing: 0.01em;
@@ -593,15 +647,8 @@
 
         .results-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: 1fr 1fr;
             gap: 10px;
-            margin-bottom: 14px;
-        }
-
-        @media (max-width:768px) {
-            .results-grid {
-                grid-template-columns: 1fr 1fr;
-            }
         }
 
         @media (max-width:480px) {
@@ -618,6 +665,11 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            min-width: 0;
+        }
+
+        .result-card.full-width {
+            grid-column: 1 / -1;
         }
 
         .result-card .rc-label {
@@ -655,7 +707,7 @@
 
         .result-card.primary .rc-value {
             color: var(--paper);
-            font-size: 20px;
+            font-size: 22px;
         }
 
         .result-card.primary .rc-sub {
@@ -675,12 +727,11 @@
         .gauge-wrap {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 12px;
             background: var(--paper);
             border: 1.5px solid var(--paper-line);
             border-radius: 8px;
             padding: 10px 14px;
-            margin-bottom: 12px;
         }
 
         .gauge-track {
@@ -716,20 +767,23 @@
             gap: 12px;
             flex-wrap: wrap;
             padding-top: 4px;
+            border-top: 1.5px dashed var(--paper-line);
         }
 
         .btn-copy {
+            width: 100%;
             font-family: 'JetBrains Mono', monospace;
-            font-size: 11px;
+            font-size: 11.5px;
             font-weight: 600;
-            padding: 7px 14px;
+            padding: 10px 16px;
             background: var(--ink);
             color: var(--paper);
             border: none;
-            border-radius: 5px;
+            border-radius: 6px;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 6px;
             transition: background 0.15s ease;
         }
@@ -754,7 +808,7 @@
             gap: 12px;
             justify-content: center;
             flex-wrap: wrap;
-            margin-top: 18px;
+            margin-top: 20px;
             font-family: 'JetBrains Mono', monospace;
             font-size: 10.5px;
             color: #768199;
@@ -775,223 +829,229 @@
     <div class="masthead">
         <div class="eyebrow">Risk Desk · Advanced Sizing</div>
         <h1>Order Ticket</h1>
-        <p>Complete execution worksheet with customizable target distributions, fee buffers, and multi-currency position
-            sizing.</p>
+        <p>Real-time calculation desk with dynamic target distributions, fee buffers, and multi-currency sizing.</p>
     </div>
 
     <div class="desk">
-        <div class="ticket">
+        <div class="ticket-wrapper">
 
-            <div class="ticket-top">
-                <div>
-                    <div class="ticket-id" id="ticketId">TICKET NO. — LIVE</div>
-                    <div class="ticket-title">Position Size Worksheet</div>
-                </div>
-                <div class="top-tags">
-                    <div class="ticket-tag" id="statusTag">Ready</div>
-                </div>
-            </div>
-
-            <!-- Long/Short & Mode Selectors -->
-            <div class="control-strip">
-                <div class="pill-group" id="dirGroup">
-                    <button type="button" class="pill-btn long active" data-dir="LONG">▲ Long (Alt+L)</button>
-                    <button type="button" class="pill-btn short" data-dir="SHORT">▼ Short (Alt+S)</button>
-                </div>
-
-                <div class="pill-group" id="modeGroup">
-                    <button type="button" class="pill-btn active" data-mode="price">Price Mode</button>
-                    <button type="button" class="pill-btn" data-mode="percent">% Distance</button>
-                </div>
-            </div>
-
-            <div class="ticket-body">
-
-                <!-- Enhanced Capital Field -->
-                <div class="field">
-                    <label for="capital">
-                        Trading Capital
-                        <span class="badge-words" id="capitalWords">₹1 Lakh</span>
-                    </label>
-                    <div class="chip-group" id="capitalChips" style="margin-bottom:2px;">
-                        <button type="button" class="chip-btn" data-cap="50000">50K</button>
-                        <button type="button" class="chip-btn active" data-cap="100000">1L</button>
-                        <button type="button" class="chip-btn" data-cap="200000">2L</button>
-                        <button type="button" class="chip-btn" data-cap="500000">5L</button>
-                        <button type="button" class="chip-btn" data-cap="1000000">10L</button>
-                        <button type="button" class="chip-btn" data-cap="2500000">25L</button>
+            <!-- LEFT COLUMN: Ticket Inputs -->
+            <div class="ticket-main">
+                <div class="ticket-top">
+                    <div>
+                        <div class="ticket-id" id="ticketId">TICKET NO. — LIVE</div>
+                        <div class="ticket-title">Position Size Worksheet</div>
                     </div>
-                    <div class="input-row">
-                        <span class="prefix">₹</span>
-                        <input type="text" id="capital" placeholder="1,00,000" inputmode="numeric">
+                    <div class="top-tags">
+                        <div class="ticket-tag" id="statusTag">Ready</div>
                     </div>
                 </div>
 
-                <!-- Exchange Rate Field -->
-                <div class="field">
-                    <label>Exchange Rate <span class="hint">₹ per $1</span></label>
-                    <div class="chip-group" id="rateToggle" style="margin-bottom:2px;">
-                        <button type="button" class="chip-btn active" data-rate="85">₹85</button>
-                        <button type="button" class="chip-btn" data-rate="90">₹90</button>
-                        <button type="button" class="chip-btn" data-rate="102">₹102</button>
-                        <button type="button" class="chip-btn" data-rate="custom">Custom</button>
+                <!-- Long/Short & Mode Selectors -->
+                <div class="control-strip">
+                    <div class="pill-group" id="dirGroup">
+                        <button type="button" class="pill-btn long active" data-dir="LONG">▲ Long (Alt+L)</button>
+                        <button type="button" class="pill-btn short" data-dir="SHORT">▼ Short (Alt+S)</button>
                     </div>
-                    <div class="input-row custom-rate hidden" id="customRateRow">
-                        <span class="prefix">₹</span>
-                        <input type="number" id="customRate" placeholder="e.g. 89.5" min="0" step="0.01"
-                            inputmode="decimal">
-                        <span class="suffix">/ $1</span>
+
+                    <div class="pill-group" id="modeGroup">
+                        <button type="button" class="pill-btn active" data-mode="price">Price Mode</button>
+                        <button type="button" class="pill-btn" data-mode="percent">% Distance</button>
                     </div>
                 </div>
 
-                <!-- Risk Percentage Field -->
-                <div class="field full">
-                    <label>Risk Per Trade <span class="hint" id="riskPctLabel">1.0%</span></label>
-                    <div class="chip-group" id="riskChips" style="margin-bottom:6px;">
-                        <button type="button" class="chip-btn" data-risk="0.5">0.5% (Alt+1)</button>
-                        <button type="button" class="chip-btn" data-risk="0.9">0.9% (Alt+2)</button>
-                        <button type="button" class="chip-btn active" data-risk="1.0">1.0% (Alt+3)</button>
-                        <button type="button" class="chip-btn" data-risk="1.4">1.4% (Alt+4)</button>
-                        <button type="button" class="chip-btn" data-risk="1.9">1.90%</button>
-                        <button type="button" class="chip-btn" data-risk="2.0">2.0%</button>
-                    </div>
-                    <div class="slider-row">
-                        <input type="range" id="riskPct" min="0.1" max="10" step="0.05" value="1.0">
-                    </div>
-                </div>
-
-                <!-- Dynamic Inputs: Price Mode -->
-                <div id="priceFields" class="field full"
-                    style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+                <div class="ticket-body">
+                    <!-- Enhanced Capital Field -->
                     <div class="field">
-                        <label for="entryPrice">Entry Price <span class="hint">USD ($)</span></label>
-                        <div class="input-row">
-                            <span class="prefix">$</span>
-                            <input type="number" id="entryPrice" placeholder="100.00" step="any" inputmode="decimal">
-                        </div>
-                    </div>
-                    <div class="field">
-                        <label for="stopPrice">Stop-Loss Price <span class="hint">USD ($)</span></label>
-                        <div class="input-row">
-                            <span class="prefix">$</span>
-                            <input type="number" id="stopPrice" placeholder="98.00" step="any" inputmode="decimal">
-                        </div>
-                    </div>
-
-                    <!-- Dynamic Take-Profit Targets with Custom Volume % -->
-                    <div class="field full">
-                        <div class="tp-presets">
-                            <label style="margin:0;">Take-Profit Targets</label>
-                            <div style="display:flex; align-items:center; gap:6px;">
-                                <div class="chip-group" id="tpPresetGroup">
-                                    <button type="button" class="chip-btn" data-tps="100,0,0">100% TP1</button>
-                                    <button type="button" class="chip-btn" data-tps="50,50,0">50/50</button>
-                                    <button type="button" class="chip-btn active" data-tps="50,30,20">50/30/20</button>
-                                    <button type="button" class="chip-btn" data-tps="33.3,33.3,33.4">33/33/34</button>
-                                </div>
-                                <span class="tp-status-tag ok" id="tpAllocTag">100%</span>
-                            </div>
-                        </div>
-
-                        <div class="tp-grid">
-                            <!-- TP1 -->
-                            <div class="tp-box" id="tp1Box">
-                                <div class="tp-box-head">
-                                    <div style="display:flex; align-items:center; gap:4px;">
-                                        <span>TP1</span>
-                                        <div class="tp-weight-wrap">
-                                            <input type="number" id="tp1Weight" value="50" min="0" max="100" step="5">
-                                            <span>%</span>
-                                        </div>
-                                    </div>
-                                    <span id="tp1Rr">1:—</span>
-                                </div>
-                                <div class="input-row">
-                                    <span class="prefix">$</span>
-                                    <input type="number" id="tp1Price" placeholder="104.00" step="any"
-                                        inputmode="decimal">
-                                </div>
-                            </div>
-
-                            <!-- TP2 -->
-                            <div class="tp-box" id="tp2Box">
-                                <div class="tp-box-head">
-                                    <div style="display:flex; align-items:center; gap:4px;">
-                                        <span>TP2</span>
-                                        <div class="tp-weight-wrap">
-                                            <input type="number" id="tp2Weight" value="30" min="0" max="100" step="5">
-                                            <span>%</span>
-                                        </div>
-                                    </div>
-                                    <span id="tp2Rr">1:—</span>
-                                </div>
-                                <div class="input-row">
-                                    <span class="prefix">$</span>
-                                    <input type="number" id="tp2Price" placeholder="106.00" step="any"
-                                        inputmode="decimal">
-                                </div>
-                            </div>
-
-                            <!-- TP3 -->
-                            <div class="tp-box" id="tp3Box">
-                                <div class="tp-box-head">
-                                    <div style="display:flex; align-items:center; gap:4px;">
-                                        <span>TP3</span>
-                                        <div class="tp-weight-wrap">
-                                            <input type="number" id="tp3Weight" value="20" min="0" max="100" step="5">
-                                            <span>%</span>
-                                        </div>
-                                    </div>
-                                    <span id="tp3Rr">1:—</span>
-                                </div>
-                                <div class="input-row">
-                                    <span class="prefix">$</span>
-                                    <input type="number" id="tp3Price" placeholder="110.00" step="any"
-                                        inputmode="decimal">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Dynamic Inputs: Percent Mode -->
-                <div id="percentFields" class="field full hidden">
-                    <label>Stop-Loss Distance <span class="hint">from entry</span></label>
-                    <div class="slider-row">
-                        <input type="range" id="slPctSlider" min="0.1" max="20" step="0.1" value="2.0">
-                        <div class="precise-input">
-                            <input type="number" id="slPct" min="0.01" max="50" step="0.01" value="2.00"
-                                inputmode="decimal">
-                            <span class="suffix">%</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Fee & Slippage Toggle Bar -->
-                <div class="field full">
-                    <div class="fee-bar">
-                        <label>
-                            <input type="checkbox" id="includeFees" checked>
-                            Deduct Round-Trip Exchange Fees (0.05% Taker × 2)
+                        <label for="capital">
+                            Trading Capital
+                            <span class="badge-words" id="capitalWords">₹1 Lakh</span>
                         </label>
-                        <span id="feeSummary" style="color:var(--muted)">Est. Cost: $0.00</span>
+                        <div class="chip-group" id="capitalChips" style="margin-bottom:2px;">
+                            <button type="button" class="chip-btn" data-cap="50000">50K</button>
+                            <button type="button" class="chip-btn active" data-cap="100000">1L</button>
+                            <button type="button" class="chip-btn" data-cap="200000">2L</button>
+                            <button type="button" class="chip-btn" data-cap="500000">5L</button>
+                            <button type="button" class="chip-btn" data-cap="1000000">10L</button>
+                            <button type="button" class="chip-btn" data-cap="2500000">25L</button>
+                        </div>
+                        <div class="input-row">
+                            <span class="prefix">₹</span>
+                            <input type="text" id="capital" placeholder="1,00,000" inputmode="numeric">
+                        </div>
+                    </div>
+
+                    <!-- Exchange Rate Field -->
+                    <div class="field">
+                        <label>Exchange Rate <span class="hint">₹ per $1</span></label>
+                        <div class="chip-group" id="rateToggle" style="margin-bottom:2px;">
+                            <button type="button" class="chip-btn active" data-rate="85">₹85</button>
+                            <button type="button" class="chip-btn" data-rate="90">₹90</button>
+                            <button type="button" class="chip-btn" data-rate="102">₹102</button>
+                            <button type="button" class="chip-btn" data-rate="custom">Custom</button>
+                        </div>
+                        <div class="input-row custom-rate hidden" id="customRateRow">
+                            <span class="prefix">₹</span>
+                            <input type="number" id="customRate" placeholder="e.g. 89.5" min="0" step="0.01"
+                                inputmode="decimal">
+                            <span class="suffix">/ $1</span>
+                        </div>
+                    </div>
+
+                    <!-- Risk Percentage Field -->
+                    <div class="field full">
+                        <label>Risk Per Trade <span class="hint" id="riskPctLabel">1.0%</span></label>
+                        <div class="chip-group" id="riskChips" style="margin-bottom:6px;">
+                            <button type="button" class="chip-btn" data-risk="0.5">0.5% (Alt+1)</button>
+                            <button type="button" class="chip-btn" data-risk="0.9">0.9% (Alt+2)</button>
+                            <button type="button" class="chip-btn active" data-risk="1.0">1.0% (Alt+3)</button>
+                            <button type="button" class="chip-btn" data-risk="1.4">1.4% (Alt+4)</button>
+                            <button type="button" class="chip-btn" data-risk="1.9">1.90%</button>
+                            <button type="button" class="chip-btn" data-risk="2.0">2.0%</button>
+                        </div>
+                        <div class="slider-row">
+                            <input type="range" id="riskPct" min="0.1" max="10" step="0.05" value="1.0">
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Inputs: Price Mode -->
+                    <div id="priceFields" class="field full" style="display:contents;">
+                        <div class="field">
+                            <label for="entryPrice">Entry Price <span class="hint">USD ($)</span></label>
+                            <div class="input-row">
+                                <span class="prefix">$</span>
+                                <input type="number" id="entryPrice" placeholder="100.00" step="any"
+                                    inputmode="decimal">
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label for="stopPrice">Stop-Loss Price <span class="hint">USD ($)</span></label>
+                            <div class="input-row">
+                                <span class="prefix">$</span>
+                                <input type="number" id="stopPrice" placeholder="98.00" step="any" inputmode="decimal">
+                            </div>
+                        </div>
+
+                        <!-- Dynamic Take-Profit Targets with Custom Volume % -->
+                        <div class="field full">
+                            <div class="tp-presets">
+                                <label style="margin:0;">Take-Profit Targets</label>
+                                <div style="display:flex; align-items:center; gap:6px;">
+                                    <div class="chip-group" id="tpPresetGroup">
+                                        <button type="button" class="chip-btn" data-tps="100,0,0">100% TP1</button>
+                                        <button type="button" class="chip-btn" data-tps="50,50,0">50/50</button>
+                                        <button type="button" class="chip-btn active"
+                                            data-tps="50,30,20">50/30/20</button>
+                                        <button type="button" class="chip-btn"
+                                            data-tps="33.3,33.3,33.4">33/33/34</button>
+                                    </div>
+                                    <span class="tp-status-tag ok" id="tpAllocTag">100%</span>
+                                </div>
+                            </div>
+
+                            <div class="tp-grid">
+                                <!-- TP1 -->
+                                <div class="tp-box" id="tp1Box">
+                                    <div class="tp-box-head">
+                                        <div style="display:flex; align-items:center; gap:4px;">
+                                            <span>TP1</span>
+                                            <div class="tp-weight-wrap">
+                                                <input type="number" id="tp1Weight" value="50" min="0" max="100"
+                                                    step="5">
+                                                <span>%</span>
+                                            </div>
+                                        </div>
+                                        <span id="tp1Rr">1:—</span>
+                                    </div>
+                                    <div class="input-row">
+                                        <span class="prefix">$</span>
+                                        <input type="number" id="tp1Price" placeholder="104.00" step="any"
+                                            inputmode="decimal">
+                                    </div>
+                                </div>
+
+                                <!-- TP2 -->
+                                <div class="tp-box" id="tp2Box">
+                                    <div class="tp-box-head">
+                                        <div style="display:flex; align-items:center; gap:4px;">
+                                            <span>TP2</span>
+                                            <div class="tp-weight-wrap">
+                                                <input type="number" id="tp2Weight" value="30" min="0" max="100"
+                                                    step="5">
+                                                <span>%</span>
+                                            </div>
+                                        </div>
+                                        <span id="tp2Rr">1:—</span>
+                                    </div>
+                                    <div class="input-row">
+                                        <span class="prefix">$</span>
+                                        <input type="number" id="tp2Price" placeholder="106.00" step="any"
+                                            inputmode="decimal">
+                                    </div>
+                                </div>
+
+                                <!-- TP3 -->
+                                <div class="tp-box" id="tp3Box">
+                                    <div class="tp-box-head">
+                                        <div style="display:flex; align-items:center; gap:4px;">
+                                            <span>TP3</span>
+                                            <div class="tp-weight-wrap">
+                                                <input type="number" id="tp3Weight" value="20" min="0" max="100"
+                                                    step="5">
+                                                <span>%</span>
+                                            </div>
+                                        </div>
+                                        <span id="tp3Rr">1:—</span>
+                                    </div>
+                                    <div class="input-row">
+                                        <span class="prefix">$</span>
+                                        <input type="number" id="tp3Price" placeholder="110.00" step="any"
+                                            inputmode="decimal">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Inputs: Percent Mode -->
+                    <div id="percentFields" class="field full hidden">
+                        <label>Stop-Loss Distance <span class="hint">from entry</span></label>
+                        <div class="slider-row">
+                            <input type="range" id="slPctSlider" min="0.1" max="20" step="0.1" value="2.0">
+                            <div class="precise-input">
+                                <input type="number" id="slPct" min="0.01" max="50" step="0.01" value="2.00"
+                                    inputmode="decimal">
+                                <span class="suffix">%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fee & Slippage Toggle Bar -->
+                    <div class="field full">
+                        <div class="fee-bar">
+                            <label>
+                                <input type="checkbox" id="includeFees" checked>
+                                Deduct Round-Trip Exchange Fees (0.05% Taker × 2)
+                            </label>
+                            <span id="feeSummary" style="color:var(--muted)">Est. Cost: $0.00</span>
+                        </div>
                     </div>
                 </div>
-
             </div>
 
+            <!-- CENTER PERFORATION DIVIDER -->
             <div class="perforation"></div>
 
-            <!-- Calculation Stub -->
+            <!-- RIGHT COLUMN: Calculation Stub (Instant Live View) -->
             <div class="stub">
                 <div class="stub-head">
-                    <h2>Order Sizing & Yield Summary</h2>
+                    <h2>Order Sizing & Yield</h2>
                     <div class="stamp ok" id="stamp">Sized</div>
                 </div>
 
                 <div class="results-grid">
                     <!-- Position Size (Primary) -->
-                    <div class="result-card primary">
+                    <div class="result-card primary full-width">
                         <div class="rc-label">Position Size</div>
                         <div class="rc-value" id="posUsd">$0.00</div>
                         <div class="rc-sub" id="posInr">₹0</div>
@@ -1020,13 +1080,13 @@
 
                     <!-- Net Profit Potential -->
                     <div class="result-card">
-                        <div class="rc-label">Est. Net Profit (All TPs)</div>
+                        <div class="rc-label">Est. Net Profit</div>
                         <div class="rc-value" id="profitVal">$0.00</div>
                         <div class="rc-sub" id="profitInr">₹0</div>
                     </div>
 
-                    <!-- Leverage Required -->
-                    <div class="result-card" id="levCard">
+                    <!-- Capital Utilization -->
+                    <div class="result-card full-width" id="levCard">
                         <div class="rc-label">Capital Utilization</div>
                         <div class="rc-value" id="posPct">0%</div>
                         <div class="rc-sub" id="leverageNote">no leverage needed</div>
@@ -1041,11 +1101,13 @@
                     <div class="gauge-label" id="gaugeText">1.0%</div>
                 </div>
 
-                <div class="actions-row">
-                    <div class="footnote" id="footnote">
-                        SL Distance: 0.00% · Position = Risk ÷ SL%
+                <div>
+                    <div class="footnote" id="footnote" style="margin-bottom: 12px;">
+                        SL: 0.00% · Rate: ₹85/$1
                     </div>
-                    <button type="button" class="btn-copy" id="btnCopy">📋 Copy Ticket (Alt+C)</button>
+                    <div class="actions-row">
+                        <button type="button" class="btn-copy" id="btnCopy">📋 Copy Ticket Summary (Alt+C)</button>
+                    </div>
                 </div>
             </div>
 
@@ -1408,7 +1470,6 @@
                 document.getElementById('riskUsd').textContent = fmtUsd(riskAmountUsd + feeCostUsd);
                 document.getElementById('posUsd').textContent = fmtUsd(positionUsd);
                 document.getElementById('posInr').textContent = fmtInr(positionInr);
-                document.getElementById('capUsd').textContent = fmtUsd(capitalUsd);
                 document.getElementById('posPct').textContent = posPctOfCapital.toFixed(1) + '%';
 
                 // Quantity display
@@ -1460,9 +1521,7 @@
                 }
 
                 document.getElementById('footnote').innerHTML =
-                    `SL Distance: ${effectiveSlPct.toFixed(2)}% &nbsp;·&nbsp; ` +
-                    `Break-even: $${breakEvenPrice.toFixed(2)} &nbsp;·&nbsp; ` +
-                    `Rate used: ₹${rate}/$1`;
+                    `SL: ${effectiveSlPct.toFixed(2)}% · Rate: ₹${rate}/$1`;
 
                 // Save state for copying
                 lastCalculatedState = {
@@ -1511,7 +1570,6 @@
 
             // Reliable Global Keyboard Capture
             window.addEventListener('keydown', (e) => {
-                // Check for Alt key combinations using standardized event.code
                 if (e.altKey && !e.ctrlKey && !e.metaKey) {
                     const code = e.code;
                     const key = e.key ? e.key.toLowerCase() : '';
@@ -1546,7 +1604,7 @@
                         setRiskPreset(1.4);
                     }
                 }
-            }, true); // Use capture phase so focused input boxes don't swallow shortcut events
+            }, true);
 
             // Event Listeners
             [entryPriceEl, stopPriceEl, tp1PriceEl, tp2PriceEl, tp3PriceEl, tp1WeightEl, tp2WeightEl, tp3WeightEl, includeFeesEl].forEach(el => {
