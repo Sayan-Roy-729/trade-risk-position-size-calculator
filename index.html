@@ -86,7 +86,6 @@
             line-height: 1.5;
         }
 
-        /* Two-column Ticket Container */
         .desk {
             max-width: 1260px;
             margin: 0 auto;
@@ -111,7 +110,6 @@
             }
         }
 
-        /* Left Ticket Section */
         .ticket-main {
             display: flex;
             flex-direction: column;
@@ -161,7 +159,6 @@
             white-space: nowrap;
         }
 
-        /* Control Strip */
         .control-strip {
             background: #e5dbc1;
             padding: 10px 28px;
@@ -405,7 +402,6 @@
             color: var(--paper-muted);
         }
 
-        /* Dynamic Multi-TP Module */
         .tp-presets {
             display: flex;
             justify-content: space-between;
@@ -496,7 +492,6 @@
             margin: 0;
         }
 
-        /* Fee Settings bar */
         .fee-bar {
             display: flex;
             align-items: center;
@@ -531,7 +526,6 @@
             display: none !important;
         }
 
-        /* ---- Perforation Tear-Line ---- */
         .perforation {
             position: relative;
             width: 0;
@@ -583,14 +577,13 @@
             }
         }
 
-        /* ---- Right Summary Stub ---- */
         .stub {
             background: var(--paper-2);
             padding: 24px 26px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            gap: 16px;
+            gap: 14px;
             min-width: 0;
         }
 
@@ -861,23 +854,23 @@
                 </div>
 
                 <div class="ticket-body">
-                    <!-- Enhanced Capital Field -->
+                    <!-- Capital Field -->
                     <div class="field">
                         <label for="capital">
                             Trading Capital
-                            <span class="badge-words" id="capitalWords">₹1 Lakh</span>
+                            <span class="badge-words" id="capitalWords">₹10k</span>
                         </label>
                         <div class="chip-group" id="capitalChips" style="margin-bottom:2px;">
+                            <button type="button" class="chip-btn active" data-cap="10000">10K</button>
                             <button type="button" class="chip-btn" data-cap="50000">50K</button>
-                            <button type="button" class="chip-btn active" data-cap="100000">1L</button>
+                            <button type="button" class="chip-btn" data-cap="100000">1L</button>
                             <button type="button" class="chip-btn" data-cap="200000">2L</button>
                             <button type="button" class="chip-btn" data-cap="500000">5L</button>
                             <button type="button" class="chip-btn" data-cap="1000000">10L</button>
-                            <button type="button" class="chip-btn" data-cap="2500000">25L</button>
                         </div>
                         <div class="input-row">
                             <span class="prefix">₹</span>
-                            <input type="text" id="capital" placeholder="1,00,000" inputmode="numeric">
+                            <input type="text" id="capital" placeholder="10,000" inputmode="numeric">
                         </div>
                     </div>
 
@@ -885,9 +878,9 @@
                     <div class="field">
                         <label>Exchange Rate <span class="hint">₹ per $1</span></label>
                         <div class="chip-group" id="rateToggle" style="margin-bottom:2px;">
-                            <button type="button" class="chip-btn active" data-rate="85">₹85</button>
+                            <button type="button" class="chip-btn" data-rate="85">₹85</button>
                             <button type="button" class="chip-btn" data-rate="90">₹90</button>
-                            <button type="button" class="chip-btn" data-rate="102">₹102</button>
+                            <button type="button" class="chip-btn active" data-rate="102">₹102</button>
                             <button type="button" class="chip-btn" data-rate="custom">Custom</button>
                         </div>
                         <div class="input-row custom-rate hidden" id="customRateRow">
@@ -900,17 +893,17 @@
 
                     <!-- Risk Percentage Field -->
                     <div class="field full">
-                        <label>Risk Per Trade <span class="hint" id="riskPctLabel">1.0%</span></label>
+                        <label>Risk Per Trade <span class="hint" id="riskPctLabel">0.90%</span></label>
                         <div class="chip-group" id="riskChips" style="margin-bottom:6px;">
                             <button type="button" class="chip-btn" data-risk="0.5">0.5% (Alt+1)</button>
-                            <button type="button" class="chip-btn" data-risk="0.9">0.9% (Alt+2)</button>
-                            <button type="button" class="chip-btn active" data-risk="1.0">1.0% (Alt+3)</button>
+                            <button type="button" class="chip-btn active" data-risk="0.9">0.9% (Alt+2)</button>
+                            <button type="button" class="chip-btn" data-risk="1.0">1.0% (Alt+3)</button>
                             <button type="button" class="chip-btn" data-risk="1.4">1.4% (Alt+4)</button>
                             <button type="button" class="chip-btn" data-risk="1.9">1.90%</button>
                             <button type="button" class="chip-btn" data-risk="2.0">2.0%</button>
                         </div>
                         <div class="slider-row">
-                            <input type="range" id="riskPct" min="0.1" max="10" step="0.05" value="1.0">
+                            <input type="range" id="riskPct" min="0.1" max="10" step="0.05" value="0.9">
                         </div>
                     </div>
 
@@ -920,7 +913,7 @@
                             <label for="entryPrice">Entry Price <span class="hint">USD ($)</span></label>
                             <div class="input-row">
                                 <span class="prefix">$</span>
-                                <input type="number" id="entryPrice" placeholder="100.00" step="any"
+                                <input type="number" id="entryPrice" placeholder="0.7388" step="any"
                                     inputmode="decimal">
                             </div>
                         </div>
@@ -928,20 +921,20 @@
                             <label for="stopPrice">Stop-Loss Price <span class="hint">USD ($)</span></label>
                             <div class="input-row">
                                 <span class="prefix">$</span>
-                                <input type="number" id="stopPrice" placeholder="98.00" step="any" inputmode="decimal">
+                                <input type="number" id="stopPrice" placeholder="0.7280" step="any" inputmode="decimal">
                             </div>
                         </div>
 
-                        <!-- Dynamic Take-Profit Targets with Custom Volume % -->
+                        <!-- Dynamic Take-Profit Targets -->
                         <div class="field full">
                             <div class="tp-presets">
                                 <label style="margin:0;">Take-Profit Targets</label>
                                 <div style="display:flex; align-items:center; gap:6px;">
                                     <div class="chip-group" id="tpPresetGroup">
-                                        <button type="button" class="chip-btn" data-tps="100,0,0">100% TP1</button>
+                                        <button type="button" class="chip-btn active" data-tps="100,0,0">100%
+                                            TP1</button>
                                         <button type="button" class="chip-btn" data-tps="50,50,0">50/50</button>
-                                        <button type="button" class="chip-btn active"
-                                            data-tps="50,30,20">50/30/20</button>
+                                        <button type="button" class="chip-btn" data-tps="50,30,20">50/30/20</button>
                                         <button type="button" class="chip-btn"
                                             data-tps="33.3,33.3,33.4">33/33/34</button>
                                     </div>
@@ -956,7 +949,7 @@
                                         <div style="display:flex; align-items:center; gap:4px;">
                                             <span>TP1</span>
                                             <div class="tp-weight-wrap">
-                                                <input type="number" id="tp1Weight" value="50" min="0" max="100"
+                                                <input type="number" id="tp1Weight" value="100" min="0" max="100"
                                                     step="5">
                                                 <span>%</span>
                                             </div>
@@ -965,7 +958,7 @@
                                     </div>
                                     <div class="input-row">
                                         <span class="prefix">$</span>
-                                        <input type="number" id="tp1Price" placeholder="104.00" step="any"
+                                        <input type="number" id="tp1Price" placeholder="0.7585" step="any"
                                             inputmode="decimal">
                                     </div>
                                 </div>
@@ -976,7 +969,7 @@
                                         <div style="display:flex; align-items:center; gap:4px;">
                                             <span>TP2</span>
                                             <div class="tp-weight-wrap">
-                                                <input type="number" id="tp2Weight" value="30" min="0" max="100"
+                                                <input type="number" id="tp2Weight" value="0" min="0" max="100"
                                                     step="5">
                                                 <span>%</span>
                                             </div>
@@ -996,7 +989,7 @@
                                         <div style="display:flex; align-items:center; gap:4px;">
                                             <span>TP3</span>
                                             <div class="tp-weight-wrap">
-                                                <input type="number" id="tp3Weight" value="20" min="0" max="100"
+                                                <input type="number" id="tp3Weight" value="0" min="0" max="100"
                                                     step="5">
                                                 <span>%</span>
                                             </div>
@@ -1042,7 +1035,7 @@
             <!-- CENTER PERFORATION DIVIDER -->
             <div class="perforation"></div>
 
-            <!-- RIGHT COLUMN: Calculation Stub (Instant Live View) -->
+            <!-- RIGHT COLUMN: Calculation Stub -->
             <div class="stub">
                 <div class="stub-head">
                     <h2>Order Sizing & Yield</h2>
@@ -1086,10 +1079,17 @@
                     </div>
 
                     <!-- Capital Utilization -->
-                    <div class="result-card full-width" id="levCard">
+                    <div class="result-card" id="levCard">
                         <div class="rc-label">Capital Utilization</div>
                         <div class="rc-value" id="posPct">0%</div>
                         <div class="rc-sub" id="leverageNote">no leverage needed</div>
+                    </div>
+
+                    <!-- Max Safe Leverage -->
+                    <div class="result-card" id="maxSafeLevCard">
+                        <div class="rc-label">Max Safe Leverage</div>
+                        <div class="rc-value" id="maxSafeLevVal">—</div>
+                        <div class="rc-sub" id="maxSafeLevSub">with liq buffer</div>
                     </div>
                 </div>
 
@@ -1098,12 +1098,12 @@
                     <div class="gauge-track">
                         <div class="gauge-fill" id="gaugeFill"></div>
                     </div>
-                    <div class="gauge-label" id="gaugeText">1.0%</div>
+                    <div class="gauge-label" id="gaugeText">0.90%</div>
                 </div>
 
                 <div>
                     <div class="footnote" id="footnote" style="margin-bottom: 12px;">
-                        SL: 0.00% · Rate: ₹85/$1
+                        SL: 0.00% · Rate: ₹102/$1
                     </div>
                     <div class="actions-row">
                         <button type="button" class="btn-copy" id="btnCopy">📋 Copy Ticket Summary (Alt+C)</button>
@@ -1164,10 +1164,13 @@
             const gaugeFill = document.getElementById('gaugeFill');
             const gaugeText = document.getElementById('gaugeText');
             const levCard = document.getElementById('levCard');
+            const posPctEl = document.getElementById('posPct');
+            const maxSafeLevVal = document.getElementById('maxSafeLevVal');
+            const maxSafeLevSub = document.getElementById('maxSafeLevSub');
             const btnCopy = document.getElementById('btnCopy');
 
-            // State
-            let currentRate = 85;
+            // State: Default initialized to ₹102 to match active button
+            let currentRate = 102;
             let currentDirection = 'LONG';
             let currentMode = 'price';
             let lastCalculatedState = {};
@@ -1181,7 +1184,6 @@
                 return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             }
 
-            // Convert number to Indian Denominations
             function formatIndianWords(num) {
                 if (!num || num <= 0) return '₹0';
                 if (num >= 10000000) {
@@ -1209,7 +1211,6 @@
                 });
             }
 
-            // Capital Input Live Auto-Comma Formatting
             capitalEl.addEventListener('input', () => {
                 let clean = capitalEl.value.replace(/[^0-9]/g, '');
                 if (clean) {
@@ -1224,7 +1225,6 @@
                 calculate();
             });
 
-            // Capital Preset Chips
             capitalChips.forEach(btn => {
                 btn.addEventListener('click', () => {
                     const val = parseFloat(btn.dataset.cap);
@@ -1235,7 +1235,6 @@
                 });
             });
 
-            // TP Distribution Presets
             tpPresetBtns.forEach(btn => {
                 btn.addEventListener('click', () => {
                     tpPresetBtns.forEach(b => b.classList.remove('active'));
@@ -1248,7 +1247,6 @@
                 });
             });
 
-            // TP Percentage Custom Inputs
             [tp1WeightEl, tp2WeightEl, tp3WeightEl].forEach(el => {
                 el.addEventListener('input', () => {
                     tpPresetBtns.forEach(b => b.classList.remove('active'));
@@ -1256,7 +1254,6 @@
                 });
             });
 
-            // Direction Toggle
             function setDirection(dir) {
                 currentDirection = dir;
                 dirButtons.forEach(b => {
@@ -1266,7 +1263,6 @@
             }
             dirButtons.forEach(btn => btn.addEventListener('click', () => setDirection(btn.dataset.dir)));
 
-            // Mode Toggle
             modeButtons.forEach(btn => {
                 btn.addEventListener('click', () => {
                     modeButtons.forEach(b => b.classList.remove('active'));
@@ -1283,7 +1279,6 @@
                 });
             });
 
-            // Rate Toggle
             rateButtons.forEach(btn => {
                 btn.addEventListener('click', () => {
                     rateButtons.forEach(b => b.classList.remove('active'));
@@ -1305,7 +1300,6 @@
                 calculate();
             });
 
-            // Risk Preset Selection
             function setRiskPreset(val) {
                 riskPctEl.value = val;
                 riskChips.forEach(b => {
@@ -1321,7 +1315,6 @@
                 calculate();
             });
 
-            // SL Distance sync
             slPctSlider.addEventListener('input', () => {
                 slPctEl.value = parseFloat(slPctSlider.value).toFixed(2);
                 calculate();
@@ -1338,7 +1331,7 @@
             function calculate() {
                 const capital = getRawCapital();
                 const riskPct = parseFloat(riskPctEl.value) || 0;
-                const rate = currentRate > 0 ? currentRate : 85;
+                const rate = currentRate > 0 ? currentRate : 102;
                 const deductFees = includeFeesEl.checked;
 
                 riskPctLabel.textContent = riskPct.toFixed(2) + '%';
@@ -1359,7 +1352,6 @@
                 const w3 = Math.max(0, parseFloat(tp3WeightEl.value) || 0);
                 const totalTpWeight = w1 + w2 + w3;
 
-                // Validate TP Weight Allocation
                 tpAllocTag.textContent = `${Math.round(totalTpWeight)}% alloc`;
                 if (Math.abs(totalTpWeight - 100) > 0.5) {
                     tpAllocTag.className = 'tp-status-tag warn';
@@ -1398,28 +1390,25 @@
                 if (effectiveSlPct > 0 && isValidTrade) {
                     positionInr = riskAmountInr / (effectiveSlPct / 100);
                     positionUsd = rate > 0 ? positionInr / rate : 0;
-                    if (entry > 0 && currentMode === 'price') {
+                    if (entry > 0) {
                         units = positionUsd / entry;
                     }
                 }
 
-                // Fee estimation (0.05% taker × 2 for entry + exit)
                 const roundTripFeePct = deductFees ? 0.001 : 0.0;
                 const feeCostUsd = positionUsd * roundTripFeePct;
                 document.getElementById('feeSummary').textContent = `Est. Cost: ${fmtUsd(feeCostUsd)}`;
 
-                // Break-even price calculation
                 let breakEvenPrice = 0;
                 if (entry > 0) {
                     breakEvenPrice = currentDirection === 'LONG'
                         ? entry * (1 + roundTripFeePct)
                         : entry * (1 - roundTripFeePct);
-                    document.getElementById('beSub').textContent = `Break-Even: $${breakEvenPrice.toFixed(2)}`;
+                    document.getElementById('beSub').textContent = `Break-Even: $${breakEvenPrice < 1 ? breakEvenPrice.toFixed(4) : breakEvenPrice.toFixed(2)}`;
                 } else {
                     document.getElementById('beSub').textContent = 'Break-Even: $—';
                 }
 
-                // Dynamic Target Calculations with User Defined Weights
                 const slDistUsd = Math.abs(entry - stop);
                 let weightedProfitUsd = 0;
                 let activeAllocWeight = 0;
@@ -1449,7 +1438,6 @@
                 calcTp(tp2, w2, 'tp2Rr');
                 calcTp(tp3, w3, 'tp3Rr');
 
-                // Net Profit & Net R:R
                 const netProfitUsd = Math.max(0, weightedProfitUsd - feeCostUsd);
                 const netProfitInr = netProfitUsd * rate;
                 document.getElementById('profitVal').textContent = fmtUsd(netProfitUsd);
@@ -1464,44 +1452,64 @@
 
                 const capitalUsd = rate > 0 ? capital / rate : 0;
                 const posPctOfCapital = capital > 0 ? (positionInr / capital) * 100 : 0;
+                const effectiveLev = capital > 0 ? (positionInr / capital) : 0;
 
-                // Output formatting
+                let maxSafeLev = 0;
+                if (effectiveSlPct > 0 && isValidTrade) {
+                    const bufferedSlPct = (effectiveSlPct * 1.30) + 0.5;
+                    maxSafeLev = Math.max(1, Math.min(100, Math.floor(100 / bufferedSlPct)));
+                }
+
                 document.getElementById('riskInr').textContent = fmtInr(riskAmountInr + (feeCostUsd * rate));
                 document.getElementById('riskUsd').textContent = fmtUsd(riskAmountUsd + feeCostUsd);
                 document.getElementById('posUsd').textContent = fmtUsd(positionUsd);
                 document.getElementById('posInr').textContent = fmtInr(positionInr);
-                document.getElementById('posPct').textContent = posPctOfCapital.toFixed(1) + '%';
 
-                // Quantity display
+                // Quantity display with decimal support for low-cost assets
                 if (units > 0) {
-                    document.getElementById('qtyVal').textContent = units >= 10 ? units.toFixed(2) : units.toFixed(4);
-                    document.getElementById('qtySub').textContent = `@ $${entry.toFixed(2)} / unit`;
+                    let qtyStr = units >= 100 ? units.toFixed(2) : (units >= 1 ? units.toFixed(4) : units.toFixed(6));
+                    document.getElementById('qtyVal').textContent = qtyStr;
+                    document.getElementById('qtySub').textContent = `@ $${entry < 1 ? entry.toFixed(4) : entry.toFixed(2)} / unit`;
                 } else {
                     document.getElementById('qtyVal').textContent = '—';
                     document.getElementById('qtySub').textContent = currentMode === 'price' ? 'Enter entry price' : 'N/A in % mode';
                 }
 
-                // Leverage warning
+                // Capital Utilization Output
+                posPctEl.textContent = posPctOfCapital >= 10 ? posPctOfCapital.toFixed(1) + '%' : posPctOfCapital.toFixed(2) + '%';
                 const leverageNote = document.getElementById('leverageNote');
                 if (posPctOfCapital > 100) {
-                    const lev = (posPctOfCapital / 100).toFixed(2);
-                    leverageNote.textContent = `${lev}× leverage required`;
+                    leverageNote.textContent = `${effectiveLev.toFixed(2)}× effective lev`;
                     levCard.classList.add('alert-lev');
                 } else {
-                    leverageNote.textContent = 'no leverage needed';
+                    leverageNote.textContent = effectiveLev > 0 ? `${effectiveLev.toFixed(2)}× effective (spot)` : 'no leverage needed';
                     levCard.classList.remove('alert-lev');
                 }
 
-                // Risk Gauge
+                // Max Safe Leverage Display
+                if (maxSafeLev > 0 && isValidTrade) {
+                    maxSafeLevVal.textContent = `≤ ${maxSafeLev}×`;
+                    maxSafeLevSub.textContent = `Liq @ ~${(effectiveSlPct * 1.30).toFixed(2)}% past entry`;
+                } else {
+                    maxSafeLevVal.textContent = '—';
+                    maxSafeLevSub.textContent = 'set stop-loss';
+                }
+
                 const gaugePct = Math.min((riskPct / 5) * 100, 100);
                 gaugeFill.style.width = gaugePct + '%';
                 gaugeText.textContent = riskPct.toFixed(2) + '%';
 
-                // Validation Status
                 if (!isValidTrade) {
                     stamp.className = 'stamp warn show';
                     stamp.textContent = 'Invalid Setup';
                     statusTag.textContent = validationMsg;
+                    statusTag.style.color = 'var(--red)';
+                    statusTag.style.borderColor = 'var(--red)';
+                } else if (effectiveLev > maxSafeLev && maxSafeLev > 0) {
+                    gaugeFill.classList.add('over');
+                    stamp.className = 'stamp warn show';
+                    stamp.textContent = 'Overleveraged';
+                    statusTag.textContent = 'Size exceeds safe cap';
                     statusTag.style.color = 'var(--red)';
                     statusTag.style.borderColor = 'var(--red)';
                 } else if (riskPct > 2) {
@@ -1523,7 +1531,6 @@
                 document.getElementById('footnote').innerHTML =
                     `SL: ${effectiveSlPct.toFixed(2)}% · Rate: ₹${rate}/$1`;
 
-                // Save state for copying
                 lastCalculatedState = {
                     direction: currentDirection,
                     capitalInr: fmtInr(capital),
@@ -1532,7 +1539,7 @@
                     riskUsd: fmtUsd(riskAmountUsd + feeCostUsd),
                     posUsd: fmtUsd(positionUsd),
                     posInr: fmtInr(positionInr),
-                    units: units > 0 ? (units >= 10 ? units.toFixed(2) : units.toFixed(4)) : null,
+                    units: units > 0 ? (units >= 100 ? units.toFixed(2) : units.toFixed(4)) : null,
                     entry: entry > 0 ? entry : null,
                     stop: stop > 0 ? stop : null,
                     tp1: (w1 > 0 && tp1 > 0) ? `${w1}% @ $${tp1}` : null,
@@ -1540,11 +1547,11 @@
                     tp3: (w3 > 0 && tp3 > 0) ? `${w3}% @ $${tp3}` : null,
                     netProfitUsd: fmtUsd(netProfitUsd),
                     slPct: effectiveSlPct.toFixed(2),
-                    leverage: (posPctOfCapital / 100).toFixed(2)
+                    effectiveLev: effectiveLev.toFixed(2),
+                    maxSafeLev: maxSafeLev > 0 ? `${maxSafeLev}x` : 'N/A'
                 };
             }
 
-            // Copy Ticket Function
             function copyTicketSummary() {
                 const s = lastCalculatedState;
                 let summary = `📋 [ORDER TICKET] ${s.direction}\n`;
@@ -1557,7 +1564,7 @@
                     summary += `• Targets: ${targets.join(' | ')}\n`;
                     summary += `• Est. Net Return: ${s.netProfitUsd}\n`;
                 }
-                summary += `• Leverage: ${s.leverage}x`;
+                summary += `• Effective Lev: ${s.effectiveLev}x | Max Safe Lev: ${s.maxSafeLev}`;
 
                 navigator.clipboard.writeText(summary).then(() => {
                     const orig = btnCopy.textContent;
@@ -1568,57 +1575,31 @@
 
             btnCopy.addEventListener('click', copyTicketSummary);
 
-            // Reliable Global Keyboard Capture
             window.addEventListener('keydown', (e) => {
                 if (e.altKey && !e.ctrlKey && !e.metaKey) {
                     const code = e.code;
                     const key = e.key ? e.key.toLowerCase() : '';
 
-                    if (code === 'KeyL' || key === 'l') {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setDirection('LONG');
-                    } else if (code === 'KeyS' || key === 's') {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setDirection('SHORT');
-                    } else if (code === 'KeyC' || key === 'c') {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        copyTicketSummary();
-                    } else if (code === 'Digit1' || code === 'Numpad1' || key === '1') {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setRiskPreset(0.5);
-                    } else if (code === 'Digit2' || code === 'Numpad2' || key === '2') {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setRiskPreset(0.9);
-                    } else if (code === 'Digit3' || code === 'Numpad3' || key === '3') {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setRiskPreset(1.0);
-                    } else if (code === 'Digit4' || code === 'Numpad4' || key === '4') {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setRiskPreset(1.4);
-                    }
+                    if (code === 'KeyL' || key === 'l') { e.preventDefault(); setDirection('LONG'); }
+                    else if (code === 'KeyS' || key === 's') { e.preventDefault(); setDirection('SHORT'); }
+                    else if (code === 'KeyC' || key === 'c') { e.preventDefault(); copyTicketSummary(); }
+                    else if (code === 'Digit1' || code === 'Numpad1' || key === '1') { e.preventDefault(); setRiskPreset(0.5); }
+                    else if (code === 'Digit2' || code === 'Numpad2' || key === '2') { e.preventDefault(); setRiskPreset(0.9); }
+                    else if (code === 'Digit3' || code === 'Numpad3' || key === '3') { e.preventDefault(); setRiskPreset(1.0); }
+                    else if (code === 'Digit4' || code === 'Numpad4' || key === '4') { e.preventDefault(); setRiskPreset(1.4); }
                 }
             }, true);
 
-            // Event Listeners
             [entryPriceEl, stopPriceEl, tp1PriceEl, tp2PriceEl, tp3PriceEl, tp1WeightEl, tp2WeightEl, tp3WeightEl, includeFeesEl].forEach(el => {
                 el.addEventListener('input', calculate);
             });
 
             // Initial defaults
-            capitalEl.value = '1,00,000';
-            capitalWordsEl.textContent = formatIndianWords(100000);
-            entryPriceEl.value = 100;
-            stopPriceEl.value = 98;
-            tp1PriceEl.value = 104;
-            tp2PriceEl.value = 106;
-            tp3PriceEl.value = 110;
+            capitalEl.value = '10,000';
+            capitalWordsEl.textContent = formatIndianWords(10000);
+            entryPriceEl.value = 0.7388;
+            stopPriceEl.value = 0.7280;
+            tp1PriceEl.value = 0.7585;
             calculate();
         })();
     </script>
