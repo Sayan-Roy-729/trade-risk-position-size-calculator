@@ -87,7 +87,7 @@
         }
 
         .desk {
-            max-width: 1260px;
+            max-width: 1280px;
             margin: 0 auto;
         }
 
@@ -402,7 +402,7 @@
             color: var(--paper-muted);
         }
 
-        .tp-presets {
+        .module-head {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -411,7 +411,7 @@
             margin-bottom: 4px;
         }
 
-        .tp-status-tag {
+        .alloc-tag {
             font-family: 'JetBrains Mono', monospace;
             font-size: 10.5px;
             font-weight: 700;
@@ -421,16 +421,16 @@
             background: #e2d7ba;
         }
 
-        .tp-status-tag.ok {
+        .alloc-tag.ok {
             color: var(--teal-deep);
         }
 
-        .tp-status-tag.warn {
+        .alloc-tag.warn {
             color: var(--red);
             border-color: var(--red);
         }
 
-        .tp-grid {
+        .multi-grid {
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 10px;
@@ -439,20 +439,26 @@
         }
 
         @media (max-width:640px) {
-            .tp-grid {
+            .multi-grid {
                 grid-template-columns: 1fr;
             }
         }
 
-        .tp-box {
+        .card-box {
             background: rgba(0, 0, 0, 0.025);
             border: 1px solid var(--paper-line);
             border-radius: 6px;
             padding: 8px 10px;
             min-width: 0;
+            transition: opacity 0.2s ease, border-color 0.2s ease;
         }
 
-        .tp-box-head {
+        .card-box.inactive {
+            opacity: 0.45;
+            background: rgba(0, 0, 0, 0.01);
+        }
+
+        .card-box-head {
             font-family: 'JetBrains Mono', monospace;
             font-size: 10px;
             font-weight: 700;
@@ -464,7 +470,7 @@
             gap: 4px;
         }
 
-        .tp-weight-wrap {
+        .weight-wrap {
             display: inline-flex;
             align-items: center;
             background: var(--paper);
@@ -473,8 +479,8 @@
             padding: 1px 4px;
         }
 
-        .tp-weight-wrap input[type="number"] {
-            width: 26px;
+        .weight-wrap input[type="number"] {
+            width: 28px;
             border: none;
             background: transparent;
             font-family: 'JetBrains Mono', monospace;
@@ -486,10 +492,20 @@
             -moz-appearance: textfield;
         }
 
-        .tp-weight-wrap input[type="number"]::-webkit-outer-spin-button,
-        .tp-weight-wrap input[type="number"]::-webkit-inner-spin-button {
+        .weight-wrap input[type="number"]::-webkit-outer-spin-button,
+        .weight-wrap input[type="number"]::-webkit-inner-spin-button {
             -webkit-appearance: none;
             margin: 0;
+        }
+
+        .sub-metric {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9.5px;
+            color: var(--muted);
+            margin-top: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .fee-bar {
@@ -822,7 +838,8 @@
     <div class="masthead">
         <div class="eyebrow">Risk Desk · Advanced Sizing</div>
         <h1>Order Ticket</h1>
-        <p>Real-time calculation desk with dynamic target distributions, fee buffers, and multi-currency sizing.</p>
+        <p>Precision sizing desk with partial scaled entries, dynamic target allocations, fee buffers, and leverage
+            caps.</p>
     </div>
 
     <div class="desk">
@@ -907,28 +924,106 @@
                         </div>
                     </div>
 
-                    <!-- Dynamic Inputs: Price Mode -->
+                    <!-- DYNAMIC ENTRY STRATEGY SECTION -->
                     <div id="priceFields" class="field full" style="display:contents;">
-                        <div class="field">
-                            <label for="entryPrice">Entry Price <span class="hint">USD ($)</span></label>
-                            <div class="input-row">
-                                <span class="prefix">$</span>
-                                <input type="number" id="entryPrice" placeholder="0.7388" step="any"
-                                    inputmode="decimal">
+                        <div class="field full">
+                            <div class="module-head">
+                                <label style="margin:0;">Entry Strategy <span class="hint">Single or Scaled
+                                        Limits</span></label>
+                                <div style="display:flex; align-items:center; gap:6px;">
+                                    <div class="chip-group" id="entryPresetGroup">
+                                        <button type="button" class="chip-btn active" data-strat="100,0,0">100%
+                                            Single</button>
+                                        <button type="button" class="chip-btn" data-strat="50,50,0">50/50 Split</button>
+                                        <button type="button" class="chip-btn" data-strat="40,60,0">40/60 Split</button>
+                                        <button type="button" class="chip-btn" data-strat="33.3,33.3,33.4">33/33/34
+                                            Scale</button>
+                                    </div>
+                                    <span class="alloc-tag ok" id="entryAllocTag">100% alloc</span>
+                                </div>
+                            </div>
+
+                            <div class="multi-grid">
+                                <!-- Entry 1 -->
+                                <div class="card-box" id="entry1Box">
+                                    <div class="card-box-head">
+                                        <div style="display:flex; align-items:center; gap:4px;">
+                                            <span>Entry 1</span>
+                                            <div class="weight-wrap">
+                                                <input type="number" id="entry1Weight" value="100" min="0" max="100"
+                                                    step="5">
+                                                <span>%</span>
+                                            </div>
+                                        </div>
+                                        <span id="entry1SubTag">Full</span>
+                                    </div>
+                                    <div class="input-row">
+                                        <span class="prefix">$</span>
+                                        <input type="number" id="entry1Price" placeholder="0.7388" step="any"
+                                            inputmode="decimal">
+                                    </div>
+                                    <div class="sub-metric" id="entry1Units">— units</div>
+                                </div>
+
+                                <!-- Entry 2 -->
+                                <div class="card-box inactive" id="entry2Box">
+                                    <div class="card-box-head">
+                                        <div style="display:flex; align-items:center; gap:4px;">
+                                            <span>Entry 2</span>
+                                            <div class="weight-wrap">
+                                                <input type="number" id="entry2Weight" value="0" min="0" max="100"
+                                                    step="5">
+                                                <span>%</span>
+                                            </div>
+                                        </div>
+                                        <span id="entry2SubTag">Off</span>
+                                    </div>
+                                    <div class="input-row">
+                                        <span class="prefix">$</span>
+                                        <input type="number" id="entry2Price" placeholder="0.7320" step="any"
+                                            inputmode="decimal">
+                                    </div>
+                                    <div class="sub-metric" id="entry2Units">— units</div>
+                                </div>
+
+                                <!-- Entry 3 -->
+                                <div class="card-box inactive" id="entry3Box">
+                                    <div class="card-box-head">
+                                        <div style="display:flex; align-items:center; gap:4px;">
+                                            <span>Entry 3</span>
+                                            <div class="weight-wrap">
+                                                <input type="number" id="entry3Weight" value="0" min="0" max="100"
+                                                    step="5">
+                                                <span>%</span>
+                                            </div>
+                                        </div>
+                                        <span id="entry3SubTag">Off</span>
+                                    </div>
+                                    <div class="input-row">
+                                        <span class="prefix">$</span>
+                                        <input type="number" id="entry3Price" placeholder="0.7290" step="any"
+                                            inputmode="decimal">
+                                    </div>
+                                    <div class="sub-metric" id="entry3Units">— units</div>
+                                </div>
                             </div>
                         </div>
-                        <div class="field">
-                            <label for="stopPrice">Stop-Loss Price <span class="hint">USD ($)</span></label>
+
+                        <!-- Stop Loss Field -->
+                        <div class="field full">
+                            <label for="stopPrice">Shared Stop-Loss Price <span class="hint">Invalidation for all
+                                    entries</span></label>
                             <div class="input-row">
                                 <span class="prefix">$</span>
                                 <input type="number" id="stopPrice" placeholder="0.7280" step="any" inputmode="decimal">
                             </div>
                         </div>
 
-                        <!-- Dynamic Take-Profit Targets -->
+                        <!-- Take-Profit Targets -->
                         <div class="field full">
-                            <div class="tp-presets">
-                                <label style="margin:0;">Take-Profit Targets</label>
+                            <div class="module-head">
+                                <label style="margin:0;">Take-Profit Targets <span class="hint">Partial Exit
+                                        Distribution</span></label>
                                 <div style="display:flex; align-items:center; gap:6px;">
                                     <div class="chip-group" id="tpPresetGroup">
                                         <button type="button" class="chip-btn active" data-tps="100,0,0">100%
@@ -938,17 +1033,17 @@
                                         <button type="button" class="chip-btn"
                                             data-tps="33.3,33.3,33.4">33/33/34</button>
                                     </div>
-                                    <span class="tp-status-tag ok" id="tpAllocTag">100%</span>
+                                    <span class="alloc-tag ok" id="tpAllocTag">100% alloc</span>
                                 </div>
                             </div>
 
-                            <div class="tp-grid">
+                            <div class="multi-grid">
                                 <!-- TP1 -->
-                                <div class="tp-box" id="tp1Box">
-                                    <div class="tp-box-head">
+                                <div class="card-box" id="tp1Box">
+                                    <div class="card-box-head">
                                         <div style="display:flex; align-items:center; gap:4px;">
                                             <span>TP1</span>
-                                            <div class="tp-weight-wrap">
+                                            <div class="weight-wrap">
                                                 <input type="number" id="tp1Weight" value="100" min="0" max="100"
                                                     step="5">
                                                 <span>%</span>
@@ -964,11 +1059,11 @@
                                 </div>
 
                                 <!-- TP2 -->
-                                <div class="tp-box" id="tp2Box">
-                                    <div class="tp-box-head">
+                                <div class="card-box inactive" id="tp2Box">
+                                    <div class="card-box-head">
                                         <div style="display:flex; align-items:center; gap:4px;">
                                             <span>TP2</span>
-                                            <div class="tp-weight-wrap">
+                                            <div class="weight-wrap">
                                                 <input type="number" id="tp2Weight" value="0" min="0" max="100"
                                                     step="5">
                                                 <span>%</span>
@@ -984,11 +1079,11 @@
                                 </div>
 
                                 <!-- TP3 -->
-                                <div class="tp-box" id="tp3Box">
-                                    <div class="tp-box-head">
+                                <div class="card-box inactive" id="tp3Box">
+                                    <div class="card-box-head">
                                         <div style="display:flex; align-items:center; gap:4px;">
                                             <span>TP3</span>
-                                            <div class="tp-weight-wrap">
+                                            <div class="weight-wrap">
                                                 <input type="number" id="tp3Weight" value="0" min="0" max="100"
                                                     step="5">
                                                 <span>%</span>
@@ -1057,11 +1152,11 @@
                         <div class="rc-sub" id="riskUsd">$0.00</div>
                     </div>
 
-                    <!-- Quantity / Contract Count -->
+                    <!-- Blended Quantity -->
                     <div class="result-card">
-                        <div class="rc-label">Order Quantity</div>
+                        <div class="rc-label">Total Quantity</div>
                         <div class="rc-value" id="qtyVal">—</div>
-                        <div class="rc-sub" id="qtySub">units / shares</div>
+                        <div class="rc-sub" id="qtySub">Avg Entry: $—</div>
                     </div>
 
                     <!-- Blended R:R Ratio -->
@@ -1141,16 +1236,37 @@
             const priceFields = document.getElementById('priceFields');
             const percentFields = document.getElementById('percentFields');
 
-            const entryPriceEl = document.getElementById('entryPrice');
+            // Entry Tranche Elements
+            const entryPresetBtns = document.querySelectorAll('#entryPresetGroup .chip-btn');
+            const entryAllocTag = document.getElementById('entryAllocTag');
+            const entry1PriceEl = document.getElementById('entry1Price');
+            const entry2PriceEl = document.getElementById('entry2Price');
+            const entry3PriceEl = document.getElementById('entry3Price');
+            const entry1WeightEl = document.getElementById('entry1Weight');
+            const entry2WeightEl = document.getElementById('entry2Weight');
+            const entry3WeightEl = document.getElementById('entry3Weight');
+            const entry1Box = document.getElementById('entry1Box');
+            const entry2Box = document.getElementById('entry2Box');
+            const entry3Box = document.getElementById('entry3Box');
+            const entry1SubTag = document.getElementById('entry1SubTag');
+            const entry2SubTag = document.getElementById('entry2SubTag');
+            const entry3SubTag = document.getElementById('entry3SubTag');
+            const entry1Units = document.getElementById('entry1Units');
+            const entry2Units = document.getElementById('entry2Units');
+            const entry3Units = document.getElementById('entry3Units');
+
             const stopPriceEl = document.getElementById('stopPrice');
 
-            // TP Inputs & Allocations
+            // TP Elements
             const tp1PriceEl = document.getElementById('tp1Price');
             const tp2PriceEl = document.getElementById('tp2Price');
             const tp3PriceEl = document.getElementById('tp3Price');
             const tp1WeightEl = document.getElementById('tp1Weight');
             const tp2WeightEl = document.getElementById('tp2Weight');
             const tp3WeightEl = document.getElementById('tp3Weight');
+            const tp1Box = document.getElementById('tp1Box');
+            const tp2Box = document.getElementById('tp2Box');
+            const tp3Box = document.getElementById('tp3Box');
             const tpPresetBtns = document.querySelectorAll('#tpPresetGroup .chip-btn');
             const tpAllocTag = document.getElementById('tpAllocTag');
 
@@ -1169,7 +1285,7 @@
             const maxSafeLevSub = document.getElementById('maxSafeLevSub');
             const btnCopy = document.getElementById('btnCopy');
 
-            // State: Default initialized to ₹102 to match active button
+            // State
             let currentRate = 102;
             let currentDirection = 'LONG';
             let currentMode = 'price';
@@ -1235,6 +1351,27 @@
                 });
             });
 
+            // Entry Strategy Presets
+            entryPresetBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    entryPresetBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    const [w1, w2, w3] = btn.dataset.strat.split(',').map(Number);
+                    entry1WeightEl.value = w1;
+                    entry2WeightEl.value = w2;
+                    entry3WeightEl.value = w3;
+                    calculate();
+                });
+            });
+
+            [entry1WeightEl, entry2WeightEl, entry3WeightEl].forEach(el => {
+                el.addEventListener('input', () => {
+                    entryPresetBtns.forEach(b => b.classList.remove('active'));
+                    calculate();
+                });
+            });
+
+            // TP Distribution Presets
             tpPresetBtns.forEach(btn => {
                 btn.addEventListener('click', () => {
                     tpPresetBtns.forEach(b => b.classList.remove('active'));
@@ -1336,82 +1473,118 @@
 
                 riskPctLabel.textContent = riskPct.toFixed(2) + '%';
 
-                let effectiveSlPct = 0;
-                let units = 0;
+                const riskAmountInr = capital * (riskPct / 100);
+                const riskAmountUsd = rate > 0 ? riskAmountInr / rate : 0;
+
                 let isValidTrade = true;
                 let validationMsg = 'Sized';
 
-                const entry = parseFloat(entryPriceEl.value) || 0;
                 const stop = parseFloat(stopPriceEl.value) || 0;
                 const tp1 = parseFloat(tp1PriceEl.value) || 0;
                 const tp2 = parseFloat(tp2PriceEl.value) || 0;
                 const tp3 = parseFloat(tp3PriceEl.value) || 0;
 
-                const w1 = Math.max(0, parseFloat(tp1WeightEl.value) || 0);
-                const w2 = Math.max(0, parseFloat(tp2WeightEl.value) || 0);
-                const w3 = Math.max(0, parseFloat(tp3WeightEl.value) || 0);
-                const totalTpWeight = w1 + w2 + w3;
+                // Entry Tranche Weights
+                const ew1 = Math.max(0, parseFloat(entry1WeightEl.value) || 0);
+                const ew2 = Math.max(0, parseFloat(entry2WeightEl.value) || 0);
+                const ew3 = Math.max(0, parseFloat(entry3WeightEl.value) || 0);
+                const totalEntryWeight = ew1 + ew2 + ew3;
+
+                entryAllocTag.textContent = `${Math.round(totalEntryWeight)}% alloc`;
+                entryAllocTag.className = Math.abs(totalEntryWeight - 100) > 0.5 ? 'alloc-tag warn' : 'alloc-tag ok';
+
+                // Box Visual State Updates
+                entry1Box.classList.toggle('inactive', ew1 <= 0);
+                entry2Box.classList.toggle('inactive', ew2 <= 0);
+                entry3Box.classList.toggle('inactive', ew3 <= 0);
+                entry1SubTag.textContent = ew1 > 0 ? `${ew1}%` : 'Off';
+                entry2SubTag.textContent = ew2 > 0 ? `${ew2}%` : 'Off';
+                entry3SubTag.textContent = ew3 > 0 ? `${ew3}%` : 'Off';
+
+                // TP Weights
+                const tw1 = Math.max(0, parseFloat(tp1WeightEl.value) || 0);
+                const tw2 = Math.max(0, parseFloat(tp2WeightEl.value) || 0);
+                const tw3 = Math.max(0, parseFloat(tp3WeightEl.value) || 0);
+                const totalTpWeight = tw1 + tw2 + tw3;
 
                 tpAllocTag.textContent = `${Math.round(totalTpWeight)}% alloc`;
-                if (Math.abs(totalTpWeight - 100) > 0.5) {
-                    tpAllocTag.className = 'tp-status-tag warn';
-                } else {
-                    tpAllocTag.className = 'tp-status-tag ok';
-                }
+                tpAllocTag.className = Math.abs(totalTpWeight - 100) > 0.5 ? 'alloc-tag warn' : 'alloc-tag ok';
+
+                tp1Box.classList.toggle('inactive', tw1 <= 0);
+                tp2Box.classList.toggle('inactive', tw2 <= 0);
+                tp3Box.classList.toggle('inactive', tw3 <= 0);
+
+                let totalUnits = 0;
+                let totalPositionUsd = 0;
+                let blendedEntry = 0;
+                let effectiveSlPct = 0;
+
+                const entries = [
+                    { price: parseFloat(entry1PriceEl.value) || 0, weight: ew1, unitsEl: entry1Units, id: 'E1' },
+                    { price: parseFloat(entry2PriceEl.value) || 0, weight: ew2, unitsEl: entry2Units, id: 'E2' },
+                    { price: parseFloat(entry3PriceEl.value) || 0, weight: ew3, unitsEl: entry3Units, id: 'E3' }
+                ];
 
                 if (currentMode === 'price') {
-                    if (entry > 0 && stop > 0) {
-                        if (currentDirection === 'LONG') {
-                            if (stop >= entry) {
-                                isValidTrade = false;
-                                validationMsg = 'SL must be below entry';
+                    if (stop > 0) {
+                        entries.forEach(leg => {
+                            if (leg.weight > 0 && leg.price > 0) {
+                                if (currentDirection === 'LONG' && leg.price <= stop) {
+                                    isValidTrade = false;
+                                    validationMsg = `${leg.id} must be above SL`;
+                                } else if (currentDirection === 'SHORT' && leg.price >= stop) {
+                                    isValidTrade = false;
+                                    validationMsg = `${leg.id} must be below SL`;
+                                } else {
+                                    const slDist = Math.abs(leg.price - stop);
+                                    const legRiskUsd = riskAmountUsd * (leg.weight / 100);
+                                    const legUnits = slDist > 0 ? legRiskUsd / slDist : 0;
+
+                                    totalUnits += legUnits;
+                                    totalPositionUsd += legUnits * leg.price;
+
+                                    let uStr = legUnits >= 100 ? legUnits.toFixed(2) : (legUnits >= 1 ? legUnits.toFixed(4) : legUnits.toFixed(6));
+                                    leg.unitsEl.textContent = `${uStr} units`;
+                                }
                             } else {
-                                effectiveSlPct = ((entry - stop) / entry) * 100;
+                                leg.unitsEl.textContent = '— units';
                             }
-                        } else { // SHORT
-                            if (stop <= entry) {
-                                isValidTrade = false;
-                                validationMsg = 'SL must be above entry';
-                            } else {
-                                effectiveSlPct = ((stop - entry) / entry) * 100;
-                            }
+                        });
+
+                        if (totalUnits > 0) {
+                            blendedEntry = totalPositionUsd / totalUnits;
+                            effectiveSlPct = (Math.abs(blendedEntry - stop) / blendedEntry) * 100;
                         }
+                    } else {
+                        entries.forEach(l => l.unitsEl.textContent = '— units');
                     }
-                } else {
+                } else { // % Distance Mode
                     effectiveSlPct = parseFloat(slPctEl.value) || 0;
-                }
-
-                const riskAmountInr = capital * (riskPct / 100);
-                const riskAmountUsd = rate > 0 ? riskAmountInr / rate : 0;
-
-                let positionInr = 0;
-                let positionUsd = 0;
-
-                if (effectiveSlPct > 0 && isValidTrade) {
-                    positionInr = riskAmountInr / (effectiveSlPct / 100);
-                    positionUsd = rate > 0 ? positionInr / rate : 0;
-                    if (entry > 0) {
-                        units = positionUsd / entry;
+                    if (effectiveSlPct > 0) {
+                        const posInr = riskAmountInr / (effectiveSlPct / 100);
+                        totalPositionUsd = rate > 0 ? posInr / rate : 0;
                     }
                 }
 
+                const positionInr = totalPositionUsd * rate;
                 const roundTripFeePct = deductFees ? 0.001 : 0.0;
-                const feeCostUsd = positionUsd * roundTripFeePct;
+                const feeCostUsd = totalPositionUsd * roundTripFeePct;
                 document.getElementById('feeSummary').textContent = `Est. Cost: ${fmtUsd(feeCostUsd)}`;
 
                 let breakEvenPrice = 0;
-                if (entry > 0) {
+                if (blendedEntry > 0) {
                     breakEvenPrice = currentDirection === 'LONG'
-                        ? entry * (1 + roundTripFeePct)
-                        : entry * (1 - roundTripFeePct);
+                        ? blendedEntry * (1 + roundTripFeePct)
+                        : blendedEntry * (1 - roundTripFeePct);
                     document.getElementById('beSub').textContent = `Break-Even: $${breakEvenPrice < 1 ? breakEvenPrice.toFixed(4) : breakEvenPrice.toFixed(2)}`;
                 } else {
                     document.getElementById('beSub').textContent = 'Break-Even: $—';
                 }
 
-                const slDistUsd = Math.abs(entry - stop);
+                // Take-Profit & Blended R:R calculations against blended entry
                 let weightedProfitUsd = 0;
                 let activeAllocWeight = 0;
+                const slDistUsd = Math.abs(blendedEntry - stop);
 
                 function calcTp(tpVal, weightPct, labelElId) {
                     const labelEl = document.getElementById(labelElId);
@@ -1419,13 +1592,13 @@
                         labelEl.textContent = weightPct > 0 ? '1:—' : '0%';
                         return null;
                     }
-                    if (entry > 0 && stop > 0 && tpVal > 0) {
-                        const isTpValid = currentDirection === 'LONG' ? tpVal > entry : tpVal < entry;
+                    if (blendedEntry > 0 && stop > 0 && tpVal > 0) {
+                        const isTpValid = currentDirection === 'LONG' ? tpVal > blendedEntry : tpVal < blendedEntry;
                         if (isTpValid && slDistUsd > 0) {
-                            const targetDist = Math.abs(tpVal - entry);
+                            const targetDist = Math.abs(tpVal - blendedEntry);
                             const ratio = targetDist / slDistUsd;
                             labelEl.textContent = `1:${ratio.toFixed(2)}`;
-                            weightedProfitUsd += (units * (weightPct / 100)) * targetDist;
+                            weightedProfitUsd += (totalUnits * (weightPct / 100)) * targetDist;
                             activeAllocWeight += weightPct;
                             return ratio;
                         }
@@ -1434,9 +1607,9 @@
                     return null;
                 }
 
-                calcTp(tp1, w1, 'tp1Rr');
-                calcTp(tp2, w2, 'tp2Rr');
-                calcTp(tp3, w3, 'tp3Rr');
+                calcTp(tp1, tw1, 'tp1Rr');
+                calcTp(tp2, tw2, 'tp2Rr');
+                calcTp(tp3, tw3, 'tp3Rr');
 
                 const netProfitUsd = Math.max(0, weightedProfitUsd - feeCostUsd);
                 const netProfitInr = netProfitUsd * rate;
@@ -1460,22 +1633,21 @@
                     maxSafeLev = Math.max(1, Math.min(100, Math.floor(100 / bufferedSlPct)));
                 }
 
+                // Results Updates
                 document.getElementById('riskInr').textContent = fmtInr(riskAmountInr + (feeCostUsd * rate));
                 document.getElementById('riskUsd').textContent = fmtUsd(riskAmountUsd + feeCostUsd);
-                document.getElementById('posUsd').textContent = fmtUsd(positionUsd);
+                document.getElementById('posUsd').textContent = fmtUsd(totalPositionUsd);
                 document.getElementById('posInr').textContent = fmtInr(positionInr);
 
-                // Quantity display with decimal support for low-cost assets
-                if (units > 0) {
-                    let qtyStr = units >= 100 ? units.toFixed(2) : (units >= 1 ? units.toFixed(4) : units.toFixed(6));
+                if (totalUnits > 0) {
+                    let qtyStr = totalUnits >= 100 ? totalUnits.toFixed(2) : (totalUnits >= 1 ? totalUnits.toFixed(4) : totalUnits.toFixed(6));
                     document.getElementById('qtyVal').textContent = qtyStr;
-                    document.getElementById('qtySub').textContent = `@ $${entry < 1 ? entry.toFixed(4) : entry.toFixed(2)} / unit`;
+                    document.getElementById('qtySub').textContent = `Avg: $${blendedEntry < 1 ? blendedEntry.toFixed(4) : blendedEntry.toFixed(2)}`;
                 } else {
                     document.getElementById('qtyVal').textContent = '—';
                     document.getElementById('qtySub').textContent = currentMode === 'price' ? 'Enter entry price' : 'N/A in % mode';
                 }
 
-                // Capital Utilization Output
                 posPctEl.textContent = posPctOfCapital >= 10 ? posPctOfCapital.toFixed(1) + '%' : posPctOfCapital.toFixed(2) + '%';
                 const leverageNote = document.getElementById('leverageNote');
                 if (posPctOfCapital > 100) {
@@ -1486,7 +1658,6 @@
                     levCard.classList.remove('alert-lev');
                 }
 
-                // Max Safe Leverage Display
                 if (maxSafeLev > 0 && isValidTrade) {
                     maxSafeLevVal.textContent = `≤ ${maxSafeLev}×`;
                     maxSafeLevSub.textContent = `Liq @ ~${(effectiveSlPct * 1.30).toFixed(2)}% past entry`;
@@ -1529,7 +1700,7 @@
                 }
 
                 document.getElementById('footnote').innerHTML =
-                    `SL: ${effectiveSlPct.toFixed(2)}% · Rate: ₹${rate}/$1`;
+                    `Blended SL: ${effectiveSlPct.toFixed(2)}% · Rate: ₹${rate}/$1`;
 
                 lastCalculatedState = {
                     direction: currentDirection,
@@ -1537,14 +1708,15 @@
                     riskPct: riskPct.toFixed(2),
                     riskInr: fmtInr(riskAmountInr + (feeCostUsd * rate)),
                     riskUsd: fmtUsd(riskAmountUsd + feeCostUsd),
-                    posUsd: fmtUsd(positionUsd),
+                    posUsd: fmtUsd(totalPositionUsd),
                     posInr: fmtInr(positionInr),
-                    units: units > 0 ? (units >= 100 ? units.toFixed(2) : units.toFixed(4)) : null,
-                    entry: entry > 0 ? entry : null,
+                    units: totalUnits > 0 ? (totalUnits >= 100 ? totalUnits.toFixed(2) : totalUnits.toFixed(4)) : null,
+                    blendedEntry: blendedEntry > 0 ? blendedEntry.toFixed(4) : null,
                     stop: stop > 0 ? stop : null,
-                    tp1: (w1 > 0 && tp1 > 0) ? `${w1}% @ $${tp1}` : null,
-                    tp2: (w2 > 0 && tp2 > 0) ? `${w2}% @ $${tp2}` : null,
-                    tp3: (w3 > 0 && tp3 > 0) ? `${w3}% @ $${tp3}` : null,
+                    entriesStr: entries.filter(e => e.weight > 0 && e.price > 0).map(e => `${e.weight}% @ $${e.price}`).join(' | '),
+                    tp1: (tw1 > 0 && tp1 > 0) ? `${tw1}% @ $${tp1}` : null,
+                    tp2: (tw2 > 0 && tp2 > 0) ? `${tw2}% @ $${tp2}` : null,
+                    tp3: (tw3 > 0 && tp3 > 0) ? `${tw3}% @ $${tp3}` : null,
                     netProfitUsd: fmtUsd(netProfitUsd),
                     slPct: effectiveSlPct.toFixed(2),
                     effectiveLev: effectiveLev.toFixed(2),
@@ -1557,7 +1729,8 @@
                 let summary = `📋 [ORDER TICKET] ${s.direction}\n`;
                 summary += `• Risk: ${s.riskInr} (${s.riskUsd}) — ${s.riskPct}%\n`;
                 summary += `• Size: ${s.posUsd} (${s.posInr})\n`;
-                if (s.units && s.entry) summary += `• Units: ${s.units} @ $${s.entry} (SL: $${s.stop} | -${s.slPct}%)\n`;
+                if (s.entriesStr) summary += `• Entries: ${s.entriesStr}\n`;
+                if (s.units && s.blendedEntry) summary += `• Total Units: ${s.units} (Avg: $${s.blendedEntry} | SL: $${s.stop} | -${s.slPct}%)\n`;
 
                 const targets = [s.tp1, s.tp2, s.tp3].filter(Boolean);
                 if (targets.length > 0) {
@@ -1590,14 +1763,23 @@
                 }
             }, true);
 
-            [entryPriceEl, stopPriceEl, tp1PriceEl, tp2PriceEl, tp3PriceEl, tp1WeightEl, tp2WeightEl, tp3WeightEl, includeFeesEl].forEach(el => {
+            [
+                entry1PriceEl, entry2PriceEl, entry3PriceEl,
+                entry1WeightEl, entry2WeightEl, entry3WeightEl,
+                stopPriceEl,
+                tp1PriceEl, tp2PriceEl, tp3PriceEl,
+                tp1WeightEl, tp2WeightEl, tp3WeightEl,
+                includeFeesEl
+            ].forEach(el => {
                 el.addEventListener('input', calculate);
             });
 
-            // Initial defaults
+            // Initial defaults matching active buttons
             capitalEl.value = '10,000';
             capitalWordsEl.textContent = formatIndianWords(10000);
-            entryPriceEl.value = 0.7388;
+            entry1PriceEl.value = 0.7388;
+            entry2PriceEl.value = 0.7320;
+            entry3PriceEl.value = 0.7290;
             stopPriceEl.value = 0.7280;
             tp1PriceEl.value = 0.7585;
             calculate();
