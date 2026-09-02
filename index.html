@@ -498,14 +498,25 @@
             margin: 0;
         }
 
+        .sub-metrics-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            margin-top: 5px;
+        }
+
         .sub-metric {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 9.5px;
+            font-size: 10px;
             color: var(--muted);
-            margin-top: 4px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+        }
+
+        .sub-metric.highlight {
+            font-weight: 700;
+            color: var(--ink-text);
         }
 
         .fee-bar {
@@ -838,8 +849,8 @@
     <div class="masthead">
         <div class="eyebrow">Risk Desk · Advanced Sizing</div>
         <h1>Order Ticket</h1>
-        <p>Precision sizing desk with partial scaled entries, dynamic target allocations, fee buffers, and leverage
-            caps.</p>
+        <p>Precision sizing desk with partial scaled entries, individual tranche position sizing, dynamic target
+            allocations, and leverage caps.</p>
     </div>
 
     <div class="desk">
@@ -962,7 +973,10 @@
                                         <input type="number" id="entry1Price" placeholder="0.7388" step="any"
                                             inputmode="decimal">
                                     </div>
-                                    <div class="sub-metric" id="entry1Units">— units</div>
+                                    <div class="sub-metrics-wrap">
+                                        <div class="sub-metric highlight" id="entry1Pos">Size: $0.00 (₹0)</div>
+                                        <div class="sub-metric" id="entry1Units">Qty: — units</div>
+                                    </div>
                                 </div>
 
                                 <!-- Entry 2 -->
@@ -983,7 +997,10 @@
                                         <input type="number" id="entry2Price" placeholder="0.7320" step="any"
                                             inputmode="decimal">
                                     </div>
-                                    <div class="sub-metric" id="entry2Units">— units</div>
+                                    <div class="sub-metrics-wrap">
+                                        <div class="sub-metric highlight" id="entry2Pos">Size: $0.00 (₹0)</div>
+                                        <div class="sub-metric" id="entry2Units">Qty: — units</div>
+                                    </div>
                                 </div>
 
                                 <!-- Entry 3 -->
@@ -1004,7 +1021,10 @@
                                         <input type="number" id="entry3Price" placeholder="0.7290" step="any"
                                             inputmode="decimal">
                                     </div>
-                                    <div class="sub-metric" id="entry3Units">— units</div>
+                                    <div class="sub-metrics-wrap">
+                                        <div class="sub-metric highlight" id="entry3Pos">Size: $0.00 (₹0)</div>
+                                        <div class="sub-metric" id="entry3Units">Qty: — units</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1140,7 +1160,7 @@
                 <div class="results-grid">
                     <!-- Position Size (Primary) -->
                     <div class="result-card primary full-width">
-                        <div class="rc-label">Position Size</div>
+                        <div class="rc-label">Total Position Size</div>
                         <div class="rc-value" id="posUsd">$0.00</div>
                         <div class="rc-sub" id="posInr">₹0</div>
                     </div>
@@ -1254,6 +1274,9 @@
             const entry1Units = document.getElementById('entry1Units');
             const entry2Units = document.getElementById('entry2Units');
             const entry3Units = document.getElementById('entry3Units');
+            const entry1Pos = document.getElementById('entry1Pos');
+            const entry2Pos = document.getElementById('entry2Pos');
+            const entry3Pos = document.getElementById('entry3Pos');
 
             const stopPriceEl = document.getElementById('stopPrice');
 
@@ -1493,7 +1516,6 @@
                 entryAllocTag.textContent = `${Math.round(totalEntryWeight)}% alloc`;
                 entryAllocTag.className = Math.abs(totalEntryWeight - 100) > 0.5 ? 'alloc-tag warn' : 'alloc-tag ok';
 
-                // Box Visual State Updates
                 entry1Box.classList.toggle('inactive', ew1 <= 0);
                 entry2Box.classList.toggle('inactive', ew2 <= 0);
                 entry3Box.classList.toggle('inactive', ew3 <= 0);
@@ -1520,9 +1542,9 @@
                 let effectiveSlPct = 0;
 
                 const entries = [
-                    { price: parseFloat(entry1PriceEl.value) || 0, weight: ew1, unitsEl: entry1Units, id: 'E1' },
-                    { price: parseFloat(entry2PriceEl.value) || 0, weight: ew2, unitsEl: entry2Units, id: 'E2' },
-                    { price: parseFloat(entry3PriceEl.value) || 0, weight: ew3, unitsEl: entry3Units, id: 'E3' }
+                    { price: parseFloat(entry1PriceEl.value) || 0, weight: ew1, unitsEl: entry1Units, posEl: entry1Pos, id: 'E1', units: 0, posUsd: 0, posInr: 0 },
+                    { price: parseFloat(entry2PriceEl.value) || 0, weight: ew2, unitsEl: entry2Units, posEl: entry2Pos, id: 'E2', units: 0, posUsd: 0, posInr: 0 },
+                    { price: parseFloat(entry3PriceEl.value) || 0, weight: ew3, unitsEl: entry3Units, posEl: entry3Pos, id: 'E3', units: 0, posUsd: 0, posInr: 0 }
                 ];
 
                 if (currentMode === 'price') {
@@ -1532,22 +1554,34 @@
                                 if (currentDirection === 'LONG' && leg.price <= stop) {
                                     isValidTrade = false;
                                     validationMsg = `${leg.id} must be above SL`;
+                                    leg.unitsEl.textContent = 'Qty: Invalid';
+                                    leg.posEl.textContent = 'Size: $0.00 (₹0)';
                                 } else if (currentDirection === 'SHORT' && leg.price >= stop) {
                                     isValidTrade = false;
                                     validationMsg = `${leg.id} must be below SL`;
+                                    leg.unitsEl.textContent = 'Qty: Invalid';
+                                    leg.posEl.textContent = 'Size: $0.00 (₹0)';
                                 } else {
                                     const slDist = Math.abs(leg.price - stop);
                                     const legRiskUsd = riskAmountUsd * (leg.weight / 100);
                                     const legUnits = slDist > 0 ? legRiskUsd / slDist : 0;
+                                    const legPosUsd = legUnits * leg.price;
+                                    const legPosInr = legPosUsd * rate;
+
+                                    leg.units = legUnits;
+                                    leg.posUsd = legPosUsd;
+                                    leg.posInr = legPosInr;
 
                                     totalUnits += legUnits;
-                                    totalPositionUsd += legUnits * leg.price;
+                                    totalPositionUsd += legPosUsd;
 
                                     let uStr = legUnits >= 100 ? legUnits.toFixed(2) : (legUnits >= 1 ? legUnits.toFixed(4) : legUnits.toFixed(6));
-                                    leg.unitsEl.textContent = `${uStr} units`;
+                                    leg.unitsEl.textContent = `Qty: ${uStr} units`;
+                                    leg.posEl.textContent = `Size: ${fmtUsd(legPosUsd)} (${fmtInr(legPosInr)})`;
                                 }
                             } else {
-                                leg.unitsEl.textContent = '— units';
+                                leg.unitsEl.textContent = 'Qty: — units';
+                                leg.posEl.textContent = 'Size: $0.00 (₹0)';
                             }
                         });
 
@@ -1556,7 +1590,10 @@
                             effectiveSlPct = (Math.abs(blendedEntry - stop) / blendedEntry) * 100;
                         }
                     } else {
-                        entries.forEach(l => l.unitsEl.textContent = '— units');
+                        entries.forEach(l => {
+                            l.unitsEl.textContent = 'Qty: — units';
+                            l.posEl.textContent = 'Size: $0.00 (₹0)';
+                        });
                     }
                 } else { // % Distance Mode
                     effectiveSlPct = parseFloat(slPctEl.value) || 0;
@@ -1645,7 +1682,7 @@
                     document.getElementById('qtySub').textContent = `Avg: $${blendedEntry < 1 ? blendedEntry.toFixed(4) : blendedEntry.toFixed(2)}`;
                 } else {
                     document.getElementById('qtyVal').textContent = '—';
-                    document.getElementById('qtySub').textContent = currentMode === 'price' ? 'Enter entry price' : 'N/A in % mode';
+                    document.getElementById('qtySub').textContent = currentMode === 'price' ? 'Enter price & SL' : 'N/A in % mode';
                 }
 
                 posPctEl.textContent = posPctOfCapital >= 10 ? posPctOfCapital.toFixed(1) + '%' : posPctOfCapital.toFixed(2) + '%';
@@ -1708,12 +1745,19 @@
                     riskPct: riskPct.toFixed(2),
                     riskInr: fmtInr(riskAmountInr + (feeCostUsd * rate)),
                     riskUsd: fmtUsd(riskAmountUsd + feeCostUsd),
-                    posUsd: fmtUsd(totalPositionUsd),
-                    posInr: fmtInr(positionInr),
-                    units: totalUnits > 0 ? (totalUnits >= 100 ? totalUnits.toFixed(2) : totalUnits.toFixed(4)) : null,
+                    totalPosUsd: fmtUsd(totalPositionUsd),
+                    totalPosInr: fmtInr(positionInr),
+                    totalUnits: totalUnits > 0 ? (totalUnits >= 100 ? totalUnits.toFixed(2) : totalUnits.toFixed(4)) : null,
                     blendedEntry: blendedEntry > 0 ? blendedEntry.toFixed(4) : null,
                     stop: stop > 0 ? stop : null,
-                    entriesStr: entries.filter(e => e.weight > 0 && e.price > 0).map(e => `${e.weight}% @ $${e.price}`).join(' | '),
+                    activeEntries: entries.filter(e => e.weight > 0 && e.price > 0).map(e => ({
+                        id: e.id,
+                        weight: e.weight,
+                        price: e.price,
+                        posUsd: fmtUsd(e.posUsd),
+                        posInr: fmtInr(e.posInr),
+                        units: e.units >= 100 ? e.units.toFixed(2) : (e.units >= 1 ? e.units.toFixed(4) : e.units.toFixed(6))
+                    })),
                     tp1: (tw1 > 0 && tp1 > 0) ? `${tw1}% @ $${tp1}` : null,
                     tp2: (tw2 > 0 && tp2 > 0) ? `${tw2}% @ $${tp2}` : null,
                     tp3: (tw3 > 0 && tp3 > 0) ? `${tw3}% @ $${tp3}` : null,
@@ -1728,9 +1772,16 @@
                 const s = lastCalculatedState;
                 let summary = `📋 [ORDER TICKET] ${s.direction}\n`;
                 summary += `• Risk: ${s.riskInr} (${s.riskUsd}) — ${s.riskPct}%\n`;
-                summary += `• Size: ${s.posUsd} (${s.posInr})\n`;
-                if (s.entriesStr) summary += `• Entries: ${s.entriesStr}\n`;
-                if (s.units && s.blendedEntry) summary += `• Total Units: ${s.units} (Avg: $${s.blendedEntry} | SL: $${s.stop} | -${s.slPct}%)\n`;
+                summary += `• Total Size: ${s.totalPosUsd} (${s.totalPosInr})\n`;
+                summary += `• Invalidation (SL): $${s.stop} (Blended SL: -${s.slPct}%)\n`;
+
+                if (s.activeEntries && s.activeEntries.length > 0) {
+                    summary += `• Tranche Orders:\n`;
+                    s.activeEntries.forEach(e => {
+                        summary += `   - ${e.id} (${e.weight}%): Size ${e.posUsd} (${e.posInr}) | Qty: ${e.units} @ $${e.price}\n`;
+                    });
+                    summary += `   - Blended Entry: $${s.blendedEntry} | Total Qty: ${s.totalUnits}\n`;
+                }
 
                 const targets = [s.tp1, s.tp2, s.tp3].filter(Boolean);
                 if (targets.length > 0) {
@@ -1774,7 +1825,7 @@
                 el.addEventListener('input', calculate);
             });
 
-            // Initial defaults matching active buttons
+            // Initial defaults
             capitalEl.value = '10,000';
             capitalWordsEl.textContent = formatIndianWords(10000);
             entry1PriceEl.value = 0.7388;
